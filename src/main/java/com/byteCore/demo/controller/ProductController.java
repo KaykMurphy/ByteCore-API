@@ -20,7 +20,7 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<Page<ProductResponseDTO>> getAllProducts(Pageable pageable) {
-        Page<ProductResponseDTO> response = productService.findlAll(pageable);
+        Page<ProductResponseDTO> response = productService.findAll(pageable);
 
         return ResponseEntity.ok(response);
     }

@@ -23,7 +23,7 @@ public class ProductService {
     private final ProductMapper productMapper;
 
     @Transactional(readOnly = true)
-    public Page<ProductResponseDTO> findlAll(Pageable pageable){
+    public Page<ProductResponseDTO> findAll(Pageable pageable){
 
         log.info("Inside findlAll. Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
 
