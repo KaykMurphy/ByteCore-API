@@ -3,6 +3,7 @@ package com.byteCore.demo;
 import com.byteCore.demo.domain.Product;
 import com.byteCore.demo.dto.mapper.ProductMapper;
 import com.byteCore.demo.dto.response.ProductResponseDTO;
+import com.byteCore.demo.enums.ProductType;
 import com.byteCore.demo.repository.ProductRepository;
 import com.byteCore.demo.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +39,7 @@ public class ProductServiceTest {
         product.setId(productId);
         product.setTitle("title");
         product.setActive(true);
+        product.setType(ProductType.GAMES);
 
         ProductResponseDTO responseDTO =
                 new ProductResponseDTO(
@@ -46,7 +48,8 @@ public class ProductServiceTest {
                         "Descrição",
                         null,
                         "img.png",
-                        null
+                        null,
+                        ProductType.GAMES
                 );
 
         when(productRepository.findById(productId))
