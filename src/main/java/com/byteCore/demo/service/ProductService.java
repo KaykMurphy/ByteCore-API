@@ -39,7 +39,8 @@ public class ProductService {
 
         log.info("Inside findById. Id: {} ", id);
 
-        Product product = productRepository.findById(id).orElseThrow(() -> {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> {
             log.warn("Product not found with id: {}", id);
             return new EntityNotFoundException("Product not found with id " + id);
         });

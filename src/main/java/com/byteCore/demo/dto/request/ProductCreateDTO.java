@@ -1,5 +1,6 @@
 package com.byteCore.demo.dto.request;
 
+import com.byteCore.demo.enums.ProductType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +23,10 @@ public record ProductCreateDTO (
         BigDecimal price,
 
         @NotBlank
-        String imageUlr
+        String imageUrl,
+
+        @NotNull(message = "Tipo do produto é obrigatório")
+        ProductType type
 
 ) { }
 

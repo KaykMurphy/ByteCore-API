@@ -1,5 +1,7 @@
 package com.byteCore.demo.dto.response;
 
+import com.byteCore.demo.enums.ProductType;
+
 import java.math.BigDecimal;
 
 public record ProductResponseDTO(
@@ -9,7 +11,8 @@ public record ProductResponseDTO(
         String description,
         BigDecimal price,
         String imageUrl,
-        Long availableStock
+        Long availableStock,
+        ProductType type
 
 ) {}
 
