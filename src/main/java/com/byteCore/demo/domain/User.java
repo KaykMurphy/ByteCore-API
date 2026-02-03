@@ -2,6 +2,7 @@ package com.byteCore.demo.domain;
 
 import com.byteCore.demo.enums.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.util.UUID;
@@ -22,13 +23,18 @@ public class User {
     private String name;
 
     @Column(nullable = false,  unique = true)
+    @Email
     private String email;
 
     @Column(nullable = false,  unique = true)
     private String password;
 
+
+    private String repeatPassword;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
+
     private Role role;
 
 
