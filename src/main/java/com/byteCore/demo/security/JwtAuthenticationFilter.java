@@ -37,11 +37,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 email = jwtUtils.getUsernameFromToken(token);
             } catch (Exception e) {
-                System.out.println("Erro ao processar token JWT: " + e.getMessage());
+                log.error("Erro ao processar token JWT: {}", e.getMessage());
             }
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            log.debug("Processing authentication for email: {}", email);
 
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 
@@ -57,10 +59,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                log.debug("User authenticated successfully: {}", email);
+            } else {
+                log.warn("Token validation failed for: {}", email);
             }
         }
 
-        // Continua a cadeia de filtros
         filterChain.doFilter(request, response);
     }
 }
