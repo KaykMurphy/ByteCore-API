@@ -2,12 +2,17 @@ package com.byteCore.demo.service;
 
 import com.byteCore.demo.domain.User;
 import com.byteCore.demo.dto.mapper.UserMapper;
+import com.byteCore.demo.dto.request.LoginRequestDTO;
 import com.byteCore.demo.dto.request.RegisterRequestDTO;
+import com.byteCore.demo.dto.response.LoginResponseDTO;
 import com.byteCore.demo.dto.response.UserResponseDTO;
 import com.byteCore.demo.exceptions.DuplicateEmailException;
 import com.byteCore.demo.repository.UserRepository;
+import com.byteCore.demo.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +25,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
 
     @Transactional
@@ -40,5 +47,20 @@ public class AuthService {
         log.info("User registered successfully: {}", user.getEmail());
 
         return userMapper.toResponseDTO(user);
+    }
+
+    @Transactional
+    public LoginResponseDTO login(LoginRequestDTO request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+        );
+
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        String roleName = user.getRole().name();
+        String token = jwtUtils.generateToken(user.getEmail(), roleName);
+
+        return new LoginResponseDTO(token);
     }
 }
