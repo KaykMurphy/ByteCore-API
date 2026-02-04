@@ -2,8 +2,10 @@ package com.byteCore.demo.exceptions;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
@@ -64,6 +67,64 @@ public class ResourceExceptionHandler {
                 request.getRequestURI()
         );
 
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<StandardError> handleDuplicateEmailException(
+            DuplicateEmailException ex,
+            HttpServletRequest request){
+
+        HttpStatus status = HttpStatus.CONFLICT; // 409
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Duplicate email",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        log.warn("Duplicate email attempt: {}", ex.getMessage());
+        return ResponseEntity.status(status).body(error);
+
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<StandardError> handleInvalidCredentialsException(
+            InvalidCredentialsException ex,
+            HttpServletRequest request){
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED; // 401
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Invalid credentials",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        log.warn("Invalid credentials attempt: {}", ex.getMessage());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<StandardError> handleBadCredentialsException(
+            BadCredentialsException ex,
+            HttpServletRequest request){
+
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Bad credentials",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        log.warn("Bad credentials attempt: {}", ex.getMessage());
         return ResponseEntity.status(status).body(error);
     }
 
