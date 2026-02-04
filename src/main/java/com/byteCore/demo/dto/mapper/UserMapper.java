@@ -15,5 +15,10 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)
     User toEntity(RegisterRequestDTO dto);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "role", constant = "ADMIN")
+    @Mapping(target = "password", source = "encodedPassword")
+    User toAdmin(String name, String email, String encodedPassword);
+
     UserResponseDTO toResponseDTO(User user);
 }
