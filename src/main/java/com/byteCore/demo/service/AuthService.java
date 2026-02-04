@@ -4,16 +4,15 @@ import com.byteCore.demo.domain.User;
 import com.byteCore.demo.dto.mapper.UserMapper;
 import com.byteCore.demo.dto.request.RegisterRequestDTO;
 import com.byteCore.demo.dto.response.UserResponseDTO;
-import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.exceptions.DuplicateEmailException;
 import com.byteCore.demo.repository.UserRepository;
-import com.byteCore.demo.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -26,6 +25,8 @@ public class AuthService {
     @Transactional
     public UserResponseDTO register(RegisterRequestDTO dto){
 
+        log.info("Registration attempt for email: {}", dto.email());
+
         if (userRepository.findByEmail(dto.email()).isPresent()){
             throw new DuplicateEmailException("Email already exists");
         }
@@ -35,6 +36,8 @@ public class AuthService {
 
 
         userRepository.save(user);
+
+        log.info("User registered successfully: {}", user.getEmail());
 
         return userMapper.toResponseDTO(user);
     }
