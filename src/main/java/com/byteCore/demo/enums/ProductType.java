@@ -1,16 +1,16 @@
 package com.byteCore.demo.enums;
 
 public enum ProductType {
-    ASSINATURAS,
-    KEYS,
+    GAME_KEY,
+    GAME_DLC,
+    GAME_ACCOUNT,
+    GAME_CURRENCY,
+    STREAMING_ACCOUNT,
+    MUSIC_ACCOUNT,
+    SOFTWARE_LICENSE,
+    VPN,
     DISCORD,
-    CONTAS,
-    UTILIDADES,
-    STREAMING,
-    SOFTWARE,
-    GAMES,
-
-    // Tipos de entrega
-    AUTOMATIC_DELIVERY,
-    SERVICE
+    GIFT_CARD,
+    EDUCATION,
+    OTHER
 }

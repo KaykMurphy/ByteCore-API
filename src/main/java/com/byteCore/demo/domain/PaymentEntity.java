@@ -39,6 +39,12 @@ public class PaymentEntity {
     @Column(columnDefinition = "TEXT")
     private String qrCode;
 
+    @Column(columnDefinition = "TEXT")
+    private String pixQrCode;
+
+    @Column(columnDefinition = "TEXT")
+    private String pixQrCodeText;
+
     @Column(nullable = false)
     private Instant expiresAt;
 

@@ -29,6 +29,8 @@ public class WebhookService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final EmailService emailService;
+    private final DigitalProductDeliveryService deliveryService;
+    private final OrderService orderService;
 
     @Value("${mercadopago.webhook.secret}")
     private String webhookSecret;
@@ -36,7 +38,8 @@ public class WebhookService {
     public boolean validateSignature(String xSignature, String xRequestId, String dataId) {
         try {
             if (xSignature == null || !xSignature.contains(",")) {
-                return true;
+                log.warn("WEBHOOK REJEITADO: Assinatura ausente ou inválida");
+                return false;
             }
 
             String ts = null;
@@ -48,13 +51,19 @@ public class WebhookService {
                 else if (part.startsWith("v1=")) v1 = part.substring(3);
             }
 
-            if (ts == null || v1 == null) return false;
+            if (ts == null || v1 == null) {
+                log.warn("WEBHOOK REJEITADO: Componentes faltando");
+                return false;
+            }
 
-            // Template: id:[data.id];request-id:[x-request-id];ts:[ts];
+            // Template de validação
             String manifest = String.format("id:%s;request-id:%s;ts:%s;", dataId, xRequestId, ts);
 
             Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(webhookSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(
+                    webhookSecret.getBytes(StandardCharsets.UTF_8),
+                    "HmacSHA256"
+            );
             mac.init(secretKeySpec);
 
             byte[] hmacBytes = mac.doFinal(manifest.getBytes(StandardCharsets.UTF_8));
@@ -66,10 +75,16 @@ public class WebhookService {
                 hexString.append(hex);
             }
 
-            return hexString.toString().equals(v1);
+            boolean isValid = hexString.toString().equals(v1);
+
+            if (!isValid) {
+                log.warn("WEBHOOK REJEITADO: Assinatura inválida");
+            }
+
+            return isValid;
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error("Erro na validação criptográfica: {}", e.getMessage());
+            log.error("Erro na validação: {}", e.getMessage());
             return false;
         }
     }
@@ -79,7 +94,7 @@ public class WebhookService {
         log.info("Processando Webhook - Action: {}, Type: {}, ID: {}", action, type, dataId);
 
         if (!"payment".equalsIgnoreCase(type)) {
-            log.debug("Ignorando tópico irrelevante: {}", type);
+            log.debug("Ignorando tipo: {}", type);
             return;
         }
 
@@ -92,22 +107,24 @@ public class WebhookService {
             Payment mpPayment = client.get(Long.parseLong(externalId));
 
             PaymentEntity localPayment = paymentRepository.findByExternalId(externalId)
-                    .orElseThrow(() -> new RuntimeException("Pagamento local não encontrado: " + externalId));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Pagamento não encontrado: " + externalId
+                    ));
 
             PaymentStatus newStatus = mapStatus(mpPayment.getStatus());
 
-            // Idempotência: só processa se houver mudança de status
             if (localPayment.getStatus() != newStatus) {
-                updateLocalRecords(localPayment, newStatus);
+                updatePaymentAndOrder(localPayment, newStatus);
             }
 
         } catch (Exception e) {
-            log.error("Falha ao sincronizar pagamento {}: {}", externalId, e.getMessage());
-            throw new RuntimeException("Erro no processamento do webhook", e);
+            log.error("Erro ao processar webhook: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
-    private void updateLocalRecords(PaymentEntity payment, PaymentStatus newStatus) {
+    private void updatePaymentAndOrder(PaymentEntity payment, PaymentStatus newStatus) {
+
         log.info("Atualizando pagamento {} -> {}", payment.getExternalId(), newStatus);
 
         payment.setStatus(newStatus);
@@ -118,37 +135,64 @@ public class WebhookService {
 
         Order order = payment.getOrder();
         if (order != null) {
-            updateOrderStatus(order, newStatus);
+            processOrderStatusChange(order, newStatus);
         }
     }
 
-    private void updateOrderStatus(Order order, PaymentStatus paymentStatus) {
+    private void processOrderStatusChange(Order order, PaymentStatus paymentStatus) {
+
         OrderStatus newOrderStatus = switch (paymentStatus) {
             case APPROVED -> OrderStatus.PAID;
             case REJECTED, CANCELLED, EXPIRED -> OrderStatus.CANCELLED;
             default -> order.getStatus();
         };
 
-        if (order.getStatus() != newOrderStatus) {
-            log.info("Pedido #{} atualizado para {}", order.getId(), newOrderStatus);
-            order.setStatus(newOrderStatus);
-            orderRepository.save(order);
+        if (order.getStatus() == newOrderStatus) {
+            return;
+        }
 
-            if (newOrderStatus == OrderStatus.PAID) {
-                emailService.sendPaymentConfirmation(order);
-            }
+        log.info("Pedido #{} atualizado para {}", order.getId(), newOrderStatus);
+
+        // Atualizar status
+        order.setStatus(newOrderStatus);
+
+        if (newOrderStatus == OrderStatus.PAID) {
+            order.setPaidAt(Instant.now());
+
+            processApprovedOrder(order);
+        }
+
+        orderRepository.save(order);
+    }
+
+    private void processApprovedOrder(Order order) {
+
+        log.info("Pedido #{} APROVADO - Iniciando entrega automática", order.getId());
+
+        try {
+            emailService.sendPaymentConfirmation(order);
+
+            deliveryService.deliverOrder(order);
+
+        } catch (Exception e) {
+            log.error("Erro ao processar pedido aprovado #{}: {}",
+                    order.getId(), e.getMessage(), e);
         }
     }
 
     private PaymentStatus mapStatus(String mpStatus) {
         if (mpStatus == null) return PaymentStatus.PENDING;
+
         return switch (mpStatus.toLowerCase()) {
             case "approved" -> PaymentStatus.APPROVED;
             case "rejected" -> PaymentStatus.REJECTED;
             case "cancelled" -> PaymentStatus.CANCELLED;
             case "expired" -> PaymentStatus.EXPIRED;
             case "in_process", "pending" -> PaymentStatus.PENDING;
-            default -> PaymentStatus.PENDING;
+            default -> {
+                log.warn("Status desconhecido: {}", mpStatus);
+                yield PaymentStatus.PENDING;
+            }
         };
     }
 }
