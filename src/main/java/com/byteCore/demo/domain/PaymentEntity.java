@@ -2,6 +2,7 @@ package com.byteCore.demo.domain;
 
 import com.byteCore.demo.enums.PaymentMethod;
 import com.byteCore.demo.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,14 +16,14 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Payment {
+public class PaymentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String externalId;
+    private String externalId; // ID do Mercado Pago
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
@@ -47,8 +48,13 @@ public class Payment {
     private Instant paidAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnore
+    private Order order;
 
     @PrePersist
     public void onCreate() {

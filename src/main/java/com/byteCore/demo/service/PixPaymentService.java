@@ -1,11 +1,13 @@
 package com.byteCore.demo.service;
 
+import com.byteCore.demo.domain.Order;
 import com.byteCore.demo.domain.PaymentEntity;
 import com.byteCore.demo.domain.User;
 import com.byteCore.demo.dto.mapper.PaymentMapper;
 import com.byteCore.demo.dto.response.PixPaymentResponseDTO;
 import com.byteCore.demo.enums.PaymentMethod;
 import com.byteCore.demo.enums.PaymentStatus;
+import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.PaymentRepository;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.payment.PaymentCreateRequest;
@@ -31,6 +33,7 @@ import java.time.ZoneOffset;
 public class PixPaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
     private final PaymentMapper paymentMapper;
 
     @Value("${app.base-url}")
@@ -40,6 +43,10 @@ public class PixPaymentService {
     @Transactional
     public PixPaymentResponseDTO createPixPayment(User user, BigDecimal amount, Long orderId) {
         try {
+            // Buscamos o pedido para evitar o erro de ORDER_ID nulo no banco
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new EntityNotFoundException("Pedido não encontrado"));
+
             PaymentClient paymentClient = new PaymentClient();
 
             // payer
@@ -55,7 +62,7 @@ public class PixPaymentService {
                     .description("Pedido #" + orderId)
                     .payer(payer)
                     .externalReference(orderId.toString())
-                    .notificationUrl(baseUrl + "/webhooks/mercadopago")
+                    .notificationUrl(baseUrl + "/api/webhooks/mercadopago")
                     .dateOfExpiration(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(30))
                     .build();
 
@@ -70,6 +77,7 @@ public class PixPaymentService {
             localPayment.setStatus(PaymentStatus.PENDING);
             localPayment.setMethod(PaymentMethod.PIX);
             localPayment.setUser(user);
+            localPayment.setOrder(order); // Vinculamos o pedido ao pagamento
             localPayment.setExpiresAt(mpPayment.getDateOfExpiration().toInstant());
 
             String qrCodeBase64 = mpPayment.getPointOfInteraction().getTransactionData().getQrCodeBase64();
