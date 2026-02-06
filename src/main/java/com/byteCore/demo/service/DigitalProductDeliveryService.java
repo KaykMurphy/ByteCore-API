@@ -1,0 +1,139 @@
+package com.byteCore.demo.service;
+
+import com.byteCore.demo.domain.*;
+import com.byteCore.demo.enums.DeliveryType;
+import com.byteCore.demo.repository.OrderRepository;
+import com.byteCore.demo.repository.ProductRepository;
+import com.byteCore.demo.repository.ProductStockRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class DigitalProductDeliveryService {
+
+    private final ProductStockRepository productStockRepository;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final EmailService emailService;
+    private final OrderService orderService;
+
+    @Transactional
+    public void deliverOrder(Order order) {
+
+        log.info("Iniciando entrega automática do pedido #{}", order.getId());
+
+        try {
+            List<String> deliveredProducts = new ArrayList<>();
+
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+
+                if (product.getDeliveryType() == DeliveryType.AUTOMATIC) {
+                    String content = deliverAutomatically(item);
+                    deliveredProducts.add(formatProductForEmail(item, content));
+                } else {
+                    log.info("Produto {} requer entrega manual", product.getTitle());
+                    notifyAdminForManualDelivery(item);
+                }
+            }
+
+            if (!deliveredProducts.isEmpty()) {
+                emailService.sendDigitalProductsEmail(
+                        order.getDeliveryEmail(),
+                        order.getId(),
+                        deliveredProducts
+                );
+
+                orderService.markAsDelivered(order.getId());
+
+                log.info("Pedido #{} entregue com sucesso", order.getId());
+            }
+
+        } catch (Exception e) {
+            log.error("Erro ao entregar pedido #{}: {}", order.getId(), e.getMessage(), e);
+            notifyAdminAboutDeliveryError(order, e.getMessage());
+        }
+    }
+
+    private String deliverAutomatically(OrderItem item) {
+
+        Product product = item.getProduct();
+        int quantity = item.getQuantity();
+
+        log.info("Entregando {} unidade(s) de {}", quantity, product.getTitle());
+
+        List<ProductStock> stockItems = productStockRepository
+                .findAvailableByProductId(product.getId(), quantity);
+
+        if (stockItems.size() < quantity) {
+            throw new IllegalStateException(
+                    "Estoque insuficiente para " + product.getTitle() +
+                            ". Necessário: " + quantity + ", Disponível: " + stockItems.size()
+            );
+        }
+
+        StringBuilder content = new StringBuilder();
+
+        for (int i = 0; i < quantity; i++) {
+            ProductStock stockItem = stockItems.get(i);
+
+            stockItem.markAsSold(item);
+            productStockRepository.save(stockItem);
+
+            if (i > 0) content.append("\n");
+            content.append(stockItem.getContent());
+        }
+
+        product.decrementStock(quantity);
+        product.incrementSales(quantity);
+        productRepository.save(product);
+
+        item.markAsDelivered(content.toString());
+
+        log.info("Item entregue: {} ({}x)", product.getTitle(), quantity);
+
+        return content.toString();
+    }
+
+    private String formatProductForEmail(OrderItem item, String content) {
+        Product product = item.getProduct();
+
+        StringBuilder formatted = new StringBuilder();
+        formatted.append("").append(product.getTitle()).append("\n");
+        formatted.append("Quantidade: ").append(item.getQuantity()).append("\n");
+        formatted.append("Plataforma: ")
+                .append(product.getPlatform() != null ? product.getPlatform() : "N/A")
+                .append("\n\n");
+
+        formatted.append("SEU(S) PRODUTO(S):\n");
+        formatted.append(content).append("\n");
+
+        if (product.getActivationInstructions() != null) {
+            formatted.append("\nINSTRUÇÕES:\n");
+            formatted.append(product.getActivationInstructions()).append("\n");
+        }
+
+        formatted.append("\n").append("─".repeat(50)).append("\n\n");
+
+        return formatted.toString();
+    }
+
+    private void notifyAdminForManualDelivery(OrderItem item) {
+        log.info(
+                "Notificando admin sobre entrega manual: Pedido #{}, Produto: {}",
+                item.getOrder().getId(),
+                item.getProduct().getTitle()
+        );
+    }
+
+    private void notifyAdminAboutDeliveryError(Order order, String errorMessage) {
+        log.error("ERRO NA ENTREGA - Pedido #{}: {}", order.getId(), errorMessage);
+    }
+}
