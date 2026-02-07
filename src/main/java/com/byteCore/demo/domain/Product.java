@@ -44,6 +44,9 @@ public class Product {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Version
+    private Long version;
+
     @Column(nullable = false, length = 500)
     private String imageUrl;
 
