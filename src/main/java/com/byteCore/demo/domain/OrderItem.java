@@ -45,7 +45,7 @@ public class OrderItem {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean delivered = false;
+    private boolean delivered = false;
 
     @PrePersist
     @PreUpdate
@@ -66,9 +66,5 @@ public class OrderItem {
         this.deliveredContent = content;
         this.delivered = true;
         this.deliveredAt = Instant.now();
-    }
-
-    public boolean isDelivered() {
-        return delivered != null && delivered;
     }
 }

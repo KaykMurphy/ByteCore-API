@@ -31,7 +31,7 @@ public class ProductStock {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean available = true;
+    private boolean available = true;
 
     @Column(nullable = false)
     @Builder.Default

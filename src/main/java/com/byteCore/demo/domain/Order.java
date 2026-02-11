@@ -10,14 +10,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ═══════════════════════════════════════════════════════════════
- *  PEDIDO - E-COMMERCE DE PRODUTOS DIGITAIS
- * ═══════════════════════════════════════════════════════════════
- *
- * Para venda de: Keys de jogos, Contas, Assinaturas, etc.
- * Produtos são entregues por EMAIL após confirmação do pagamento.
- */
 @Entity
 @Table(name = "orders")
 @Getter

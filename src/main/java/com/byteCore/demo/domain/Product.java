@@ -10,18 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * ═══════════════════════════════════════════════════════════════
- *  PRODUTO DIGITAL
- * ═══════════════════════════════════════════════════════════════
- *
- * Representa produtos digitais como:
- * - Keys de jogos (Steam, Origin, Epic, etc)
- * - Contas (Netflix, Spotify, LoL, etc)
- * - Assinaturas
- * - Discord Nitro
- * - Gift Cards
- */
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -52,7 +41,7 @@ public class Product {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean active = true;
+    private boolean active = true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
