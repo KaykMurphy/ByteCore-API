@@ -45,7 +45,7 @@ public class ProductService {
             return new EntityNotFoundException("Product not found with id " + id);
         });
 
-        if (!product.getActive()){
+        if (!product.isActive()){
             log.warn("Product not found with id: {}", id);
             throw new IllegalArgumentException("Product is not active.");
         }
