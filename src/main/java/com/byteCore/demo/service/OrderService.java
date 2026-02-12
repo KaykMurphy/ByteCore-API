@@ -39,7 +39,7 @@ public class OrderService {
                             "Produto não encontrado: " + itemDto.getProductId()
                     ));
 
-            if (!product.getActive()) {
+            if (!product.isActive()) {
                 throw new IllegalStateException(
                         "Produto inativo: " + product.getTitle()
                 );
