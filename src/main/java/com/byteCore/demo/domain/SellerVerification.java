@@ -99,7 +99,7 @@ public class SellerVerification {
         this.status = VerificationStatus.REJECTED;
         this.reviewedAt = Instant.now();
         this.reviewedBy = admin;
-        this.rejectionReason = reason; // Atribua por último
+        this.rejectionReason = reason; 
     }
 
     public Boolean allDocumentsVerified() {
