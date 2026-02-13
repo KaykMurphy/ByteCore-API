@@ -1,12 +1,14 @@
 package com.byteCore.demo.domain;
 
 import com.byteCore.demo.enums.Role;
+import com.byteCore.demo.enums.VerificationStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -34,9 +36,37 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
-
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<SellerVerification> verifications = new ArrayList<>();
 
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
+    private List<Product> products = new ArrayList<>();
+
+    public boolean  isVerifiedSeller() {
+        return role == Role.VERIFIED_SELLER;
+    }
+
+    public boolean  hasPendingVerification() {
+
+        for (SellerVerification verification : verifications) {
+
+            if (verification.getStatus() == VerificationStatus.PENDING) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addVerification(SellerVerification verification) {
+        verifications.add(verification);
+        verification.setUser(this);
+    }
+
+    public void addSellerProduct(Product  product) {
+        products.add(product);
+        product.setSeller(this);
+    }
 }
 

@@ -1,10 +1,7 @@
 package com.byteCore.demo.dto.request;
 
 import com.byteCore.demo.enums.ProductType;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
@@ -26,7 +23,24 @@ public record ProductCreateDTO (
         String imageUrl,
 
         @NotNull(message = "Tipo do produto é obrigatório")
-        ProductType type
+        ProductType type,
 
+        @Size(max = 100)
+        String platform, // steam, epic ...
+
+        @Size(max = 50)
+        String region, // global, br, na ...
+
+        @Min(0)
+        Long availableStock,
+
+        @Size(max = 2000)
+        String activationInstructions,
+
+        @Size(max = 1000)
+        String importantNotes,
+
+        @Min(1)
+        Integer estimatedDeliveryMinutes
 ) { }
 
