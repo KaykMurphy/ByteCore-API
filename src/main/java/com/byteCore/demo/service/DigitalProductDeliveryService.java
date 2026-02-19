@@ -25,15 +25,15 @@ public class DigitalProductDeliveryService {
     private final OrderService orderService;
 
     @Transactional
-    public void deliverOrder(Order order) {
+    public void deliverOrder(OrderEntity order) {
 
         log.info("Iniciando entrega automática do pedido #{}", order.getId());
 
         try {
             List<String> deliveredProducts = new ArrayList<>();
 
-            for (OrderItem item : order.getItems()) {
-                Product product = item.getProduct();
+            for (OrderItemEntity item : order.getItems()) {
+                ProductEntity product = item.getProduct();
 
                 if (product.getDeliveryType() == DeliveryType.AUTOMATIC) {
                     String content = deliverAutomatically(item);
@@ -62,14 +62,14 @@ public class DigitalProductDeliveryService {
         }
     }
 
-    private String deliverAutomatically(OrderItem item) {
+    private String deliverAutomatically(OrderItemEntity item) {
 
-        Product product = item.getProduct();
+        ProductEntity product = item.getProduct();
         int quantity = item.getQuantity();
 
         log.info("Entregando {} unidade(s) de {}", quantity, product.getTitle());
 
-        List<ProductStock> stockItems = productStockRepository
+        List<ProductStockEntity> stockItems = productStockRepository
                 .findAvailableByProductId(product.getId(), quantity);
 
         if (stockItems.size() < quantity) {
@@ -82,7 +82,7 @@ public class DigitalProductDeliveryService {
         StringBuilder content = new StringBuilder();
 
         for (int i = 0; i < quantity; i++) {
-            ProductStock stockItem = stockItems.get(i);
+            ProductStockEntity stockItem = stockItems.get(i);
 
             stockItem.markAsSold(item);
             productStockRepository.save(stockItem);
@@ -102,8 +102,8 @@ public class DigitalProductDeliveryService {
         return content.toString();
     }
 
-    private String formatProductForEmail(OrderItem item, String content) {
-        Product product = item.getProduct();
+    private String formatProductForEmail(OrderItemEntity item, String content) {
+        ProductEntity product = item.getProduct();
 
         StringBuilder formatted = new StringBuilder();
         formatted.append("").append(product.getTitle()).append("\n");
@@ -125,7 +125,7 @@ public class DigitalProductDeliveryService {
         return formatted.toString();
     }
 
-    private void notifyAdminForManualDelivery(OrderItem item) {
+    private void notifyAdminForManualDelivery(OrderItemEntity item) {
         log.info(
                 "Notificando admin sobre entrega manual: Pedido #{}, Produto: {}",
                 item.getOrder().getId(),
@@ -133,7 +133,7 @@ public class DigitalProductDeliveryService {
         );
     }
 
-    private void notifyAdminAboutDeliveryError(Order order, String errorMessage) {
+    private void notifyAdminAboutDeliveryError(OrderEntity order, String errorMessage) {
         log.error("ERRO NA ENTREGA - Pedido #{}: {}", order.getId(), errorMessage);
     }
 }

@@ -1,6 +1,6 @@
 package com.byteCore.demo.security;
 
-import com.byteCore.demo.domain.User;
+import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +16,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: "+email));
 
         return new CustomUserDetails(user);

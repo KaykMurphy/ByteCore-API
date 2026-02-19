@@ -13,7 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductStock {
+public class ProductStockEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +21,7 @@ public class ProductStock {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private ProductEntity product;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -35,7 +35,7 @@ public class ProductStock {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean sold = false;
+    private boolean sold = false;
 
     private Instant soldAt;
 
@@ -44,7 +44,7 @@ public class ProductStock {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id")
-    private OrderItem orderItem;
+    private OrderItemEntity orderItem;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -58,7 +58,7 @@ public class ProductStock {
         addedAt = Instant.now();
     }
 
-    public void markAsSold(OrderItem orderItem) {
+    public void markAsSold(OrderItemEntity orderItem) {
         this.sold = true;
         this.available = false;
         this.soldAt = Instant.now();

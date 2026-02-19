@@ -1,6 +1,6 @@
 package com.byteCore.demo.controller;
 
-import com.byteCore.demo.domain.Order;
+import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.dto.request.OrderCreateDTO;
 import com.byteCore.demo.security.CustomUserDetails;
 import com.byteCore.demo.service.OrderService;
@@ -17,9 +17,9 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Order> create(@RequestBody OrderCreateDTO dto,
-                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Order order = orderService.createOrder(userDetails.getUser(), dto);
+    public ResponseEntity<OrderEntity> create(@RequestBody OrderCreateDTO dto,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        OrderEntity order = orderService.createOrder(userDetails.getUser(), dto);
         return ResponseEntity.ok(order);
     }
 }

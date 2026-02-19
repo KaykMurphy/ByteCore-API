@@ -20,7 +20,7 @@ import java.util.UUID;
 @Builder
 @Table(name = "products")
 @Entity
-public class Product {
+public class ProductEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -86,7 +86,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
-    private User seller;
+    private UserEntity seller;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -103,7 +103,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by")
-    private User approvedBy;
+    private UserEntity approvedBy;
 
     public boolean hasStock(int quantity) {
         return availableStock != null && availableStock >= quantity;
@@ -145,7 +145,7 @@ public class Product {
     }
 
     // Admin aprova produto
-    public void approveProduct(User admin) {
+    public void approveProduct(UserEntity admin) {
 
         if (status != ProductStatus.PENDING_REVIEW) {
             throw new IllegalStateException("Apenas produtos pendentes podem ser aprovados");
@@ -159,7 +159,7 @@ public class Product {
     }
 
     // Admin rejeita produto
-    public void rejectProduct(User admin, String reason) {
+    public void rejectProduct(UserEntity admin, String reason) {
 
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException("Motivo é obrigatório");

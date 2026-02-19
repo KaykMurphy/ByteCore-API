@@ -1,6 +1,6 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.domain.Order;
+import com.byteCore.demo.domain.OrderEntity;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class EmailService {
     private String baseUrl;
 
     @Async
-    public void sendPaymentConfirmation(Order order) {
+    public void sendPaymentConfirmation(OrderEntity order) {
         try {
             log.info("Enviando confirmação de pagamento para: {}", order.getDeliveryEmail());
 
@@ -85,7 +85,7 @@ public class EmailService {
         }
     }
 
-    private String buildPaymentConfirmationEmail(Order order) {
+    private String buildPaymentConfirmationEmail(OrderEntity order) {
         return String.format("""
             <html>
             <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">

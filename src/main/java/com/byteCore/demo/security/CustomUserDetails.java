@@ -1,6 +1,6 @@
 package com.byteCore.demo.security;
 
-import com.byteCore.demo.domain.User;
+import com.byteCore.demo.domain.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private final UserEntity user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -49,7 +49,7 @@ public class CustomUserDetails implements UserDetails {
         return true;
     }
 
-    public User getUser() {
+    public UserEntity getUser() {
         return user;
     }
 }

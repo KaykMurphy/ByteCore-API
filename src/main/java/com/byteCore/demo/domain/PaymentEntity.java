@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "payments")
@@ -55,12 +56,44 @@ public class PaymentEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private UserEntity user;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     @JsonIgnore
-    private Order order;
+    private OrderEntity order;
+
+    @Column
+    private Instant moneyReleaseDate; // quando será liberado
+
+    @Column
+    private Instant moneyReleasedAt; // quando foi liberado
+
+    @Column(nullable = false)
+    private boolean moneyReleased = false;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal sellerAmount; // quanto que o vendedor vai receber
+
+
+    public void calculateReleaseDate(boolean hasGoodReview){
+
+        if(paidAt ==  null) {
+            throw new IllegalStateException("Cannot calculate release date without payment date");
+        }
+
+        if (hasGoodReview) {
+            moneyReleaseDate = paidAt.plus(7, ChronoUnit.DAYS);
+        }
+        else {
+            moneyReleaseDate = paidAt.plus(14, ChronoUnit.DAYS);
+        }
+    }
+
+    public void markAsReleased() {
+        moneyReleased = true;
+        moneyReleasedAt = Instant.now();
+    }
 
     @PrePersist
     public void onCreate() {

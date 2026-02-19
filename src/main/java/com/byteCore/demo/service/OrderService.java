@@ -22,11 +22,11 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public Order createOrder(User user, OrderCreateDTO dto) {
+    public OrderEntity createOrder(UserEntity user, OrderCreateDTO dto) {
 
         log.info("Criando pedido para usuário: {}", user.getEmail());
 
-        Order order = Order.builder()
+        OrderEntity order = OrderEntity.builder()
                 .user(user)
                 .status(OrderStatus.PENDING_PAYMENT)
                 .deliveryEmail(user.getEmail()) // Usa email do usuário
@@ -34,7 +34,7 @@ public class OrderService {
 
         for (var itemDto : dto.getItems()) {
 
-            Product product = productRepository.findById(itemDto.getProductId())
+            ProductEntity product = productRepository.findById(itemDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Produto não encontrado: " + itemDto.getProductId()
                     ));
@@ -54,7 +54,7 @@ public class OrderService {
                 }
             }
 
-            OrderItem item = OrderItem.builder()
+            OrderItemEntity item = OrderItemEntity.builder()
                     .product(product)
                     .quantity(itemDto.getQuantity())
                     .price(product.getPrice())
@@ -75,7 +75,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Order findById(Long orderId) {
+    public OrderEntity findById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Pedido não encontrado: " + orderId
@@ -83,13 +83,13 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<Order> findByUser(User user) {
+    public List<OrderEntity> findByUser(UserEntity user) {
         return orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
     }
 
     @Transactional
     public void markAsPaid(Long orderId) {
-        Order order = findById(orderId);
+        OrderEntity order = findById(orderId);
 
         if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
             log.warn("Tentativa de marcar pedido {} como pago, mas status é: {}",
@@ -105,7 +105,7 @@ public class OrderService {
 
     @Transactional
     public void markAsDelivered(Long orderId) {
-        Order order = findById(orderId);
+        OrderEntity order = findById(orderId);
 
         if (order.getStatus() != OrderStatus.PAID) {
             log.warn("Tentativa de marcar pedido {} como entregue, mas status é: {}",
@@ -121,7 +121,7 @@ public class OrderService {
 
     @Transactional
     public void cancelOrder(Long orderId, String reason) {
-        Order order = findById(orderId);
+        OrderEntity order = findById(orderId);
 
         if (!order.canBeCancelled()) {
             throw new IllegalStateException(

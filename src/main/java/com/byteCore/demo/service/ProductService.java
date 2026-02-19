@@ -1,6 +1,6 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.domain.Product;
+import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.dto.mapper.ProductMapper;
 import com.byteCore.demo.dto.response.ProductResponseDTO;
 import com.byteCore.demo.repository.ProductRepository;
@@ -27,7 +27,7 @@ public class ProductService {
 
         log.info("Inside findlAll. Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<Product> products = productRepository.findAll(pageable);
+        Page<ProductEntity> products = productRepository.findAll(pageable);
 
         log.info("Found: {} products in current page", products.getTotalElements());
 
@@ -39,7 +39,7 @@ public class ProductService {
 
         log.info("Inside findById. Id: {} ", id);
 
-        Product product = productRepository.findById(id)
+        ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> {
             log.warn("Product not found with id: {}", id);
             return new EntityNotFoundException("Product not found with id " + id);
@@ -59,7 +59,7 @@ public class ProductService {
 
         log.info("Inside searchByTitle. Query: {} ", query);
 
-        List<Product> product = productRepository.findByTitleContainingIgnoreCaseAndActiveTrue(query);
+        List<ProductEntity> product = productRepository.findByTitleContainingIgnoreCaseAndActiveTrue(query);
 
         if (product.isEmpty()) {
             log.warn("Product not found with query: {}", query);

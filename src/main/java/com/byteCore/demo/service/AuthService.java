@@ -1,6 +1,6 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.domain.User;
+import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.UserMapper;
 import com.byteCore.demo.dto.request.LoginRequestDTO;
 import com.byteCore.demo.dto.request.RegisterRequestDTO;
@@ -38,7 +38,7 @@ public class AuthService {
             throw new DuplicateEmailException("Email already exists");
         }
 
-        User user = userMapper.toEntity(dto);
+        UserEntity user = userMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.password()));
 
 
@@ -55,7 +55,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
 
-        User user = userRepository.findByEmail(request.email())
+        UserEntity user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         String roleName = user.getRole().name();

@@ -1,6 +1,6 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.domain.Order;
+import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.domain.PaymentEntity;
 import com.byteCore.demo.enums.OrderStatus;
 import com.byteCore.demo.enums.PaymentStatus;
@@ -133,13 +133,13 @@ public class WebhookService {
         }
         paymentRepository.save(payment);
 
-        Order order = payment.getOrder();
+        OrderEntity order = payment.getOrder();
         if (order != null) {
             processOrderStatusChange(order, newStatus);
         }
     }
 
-    private void processOrderStatusChange(Order order, PaymentStatus paymentStatus) {
+    private void processOrderStatusChange(OrderEntity order, PaymentStatus paymentStatus) {
 
         OrderStatus newOrderStatus = switch (paymentStatus) {
             case APPROVED -> OrderStatus.PAID;
@@ -165,7 +165,7 @@ public class WebhookService {
         orderRepository.save(order);
     }
 
-    private void processApprovedOrder(Order order) {
+    private void processApprovedOrder(OrderEntity order) {
 
         log.info("Pedido #{} APROVADO - Iniciando entrega automática", order.getId());
 

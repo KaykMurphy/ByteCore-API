@@ -1,6 +1,6 @@
 package com.byteCore.demo.repository;
 
-import com.byteCore.demo.domain.ProductStock;
+import com.byteCore.demo.domain.ProductStockEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,27 +9,27 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductStockRepository extends JpaRepository<ProductStock, Long> {
+public interface ProductStockRepository extends JpaRepository<ProductStockEntity, Long> {
 
-    @Query("SELECT ps FROM ProductStock ps " +
+    @Query("SELECT ps FROM ProductStockEntity ps " +
             "WHERE ps.product.id = :productId " +
             "AND ps.available = true " +
             "AND ps.sold = false " +
             "ORDER BY ps.createdAt ASC")
-    List<ProductStock> findAvailableByProductId(
+    List<ProductStockEntity> findAvailableByProductId(
             @Param("productId") Long productId,
             @Param("limit") int limit
     );
 
-    @Query("SELECT COUNT(ps) FROM ProductStock ps " +
+    @Query("SELECT COUNT(ps) FROM ProductStockEntity ps " +
             "WHERE ps.product.id = :productId " +
             "AND ps.available = true " +
             "AND ps.sold = false")
     Long countAvailableByProductId(@Param("productId") Long productId);
 
-    List<ProductStock> findByProductId(Long productId);
+    List<ProductStockEntity> findByProductId(Long productId);
 
-    List<ProductStock> findBySoldTrue();
+    List<ProductStockEntity> findBySoldTrue();
 
-    List<ProductStock> findByAvailableTrueAndSoldFalse();
+    List<ProductStockEntity> findByAvailableTrueAndSoldFalse();
 }

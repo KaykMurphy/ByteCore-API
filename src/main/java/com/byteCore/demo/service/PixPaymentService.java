@@ -1,8 +1,8 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.domain.Order;
+import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.domain.PaymentEntity;
-import com.byteCore.demo.domain.User;
+import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.PaymentMapper;
 import com.byteCore.demo.dto.response.PixPaymentResponseDTO;
 import com.byteCore.demo.enums.PaymentMethod;
@@ -41,10 +41,10 @@ public class PixPaymentService {
 
 
     @Transactional
-    public PixPaymentResponseDTO createPixPayment(User user, BigDecimal amount, Long orderId) {
+    public PixPaymentResponseDTO createPixPayment(UserEntity user, BigDecimal amount, Long orderId) {
         try {
             // Buscamos o pedido para evitar o erro de ORDER_ID nulo no banco
-            Order order = orderRepository.findById(orderId)
+            OrderEntity order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException("Pedido não encontrado"));
 
             PaymentClient paymentClient = new PaymentClient();

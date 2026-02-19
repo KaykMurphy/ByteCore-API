@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order {
+public class OrderEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,11 +25,11 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private UserEntity user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<OrderItem> items = new ArrayList<>();
+    private List<OrderItemEntity> items = new ArrayList<>();
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private PaymentEntity payment;
@@ -74,13 +74,13 @@ public class Order {
         updatedAt = Instant.now();
     }
 
-    public void addItem(OrderItem item) {
+    public void addItem(OrderItemEntity item) {
         items.add(item);
         item.setOrder(this);
         calculateTotal();
     }
 
-    public void removeItem(OrderItem item) {
+    public void removeItem(OrderItemEntity item) {
         items.remove(item);
         item.setOrder(null);
         calculateTotal();
@@ -88,7 +88,7 @@ public class Order {
 
     public void calculateTotal() {
         this.totalAmount = items.stream()
-                .map(OrderItem::getSubtotal)
+                .map(OrderItemEntity::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

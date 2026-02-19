@@ -1,8 +1,7 @@
 package com.byteCore.demo.config;
 
-import com.byteCore.demo.domain.User;
+import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.UserMapper;
-import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +34,7 @@ public class AdminSeeder implements CommandLineRunner {
 
             log.info("Admin user not found. Creating admin...");
 
-            User admin  = userMapper.toAdmin(
+            UserEntity admin  = userMapper.toAdmin(
                     "Crono",
                     adminEmail,
                     passwordEncoder.encode(adminPassword)

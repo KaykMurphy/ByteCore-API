@@ -1,6 +1,5 @@
 package com.byteCore.demo.validation;
 
-import com.byteCore.demo.domain.User;
 import com.byteCore.demo.dto.request.RegisterRequestDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

@@ -1,6 +1,6 @@
 package com.byteCore.demo.repository;
 
-import com.byteCore.demo.domain.Product;
+import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.enums.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,21 +12,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
-    Page<Product> findByActiveTrueAndStatus(ProductStatus status, Pageable pageable);
-    List<Product> findByTitleContainingIgnoreCaseAndActiveTrue(String title);
+    Page<ProductEntity> findByActiveTrueAndStatus(ProductStatus status, Pageable pageable);
+    List<ProductEntity> findByTitleContainingIgnoreCaseAndActiveTrue(String title);
 
-    Page<Product> findBySellerIdOrderByCreatedAtDesc(UUID sellerId, Pageable pageable);
+    Page<ProductEntity> findBySellerIdOrderByCreatedAtDesc(UUID sellerId, Pageable pageable);
 
-    Page<Product> findBySellerIdAndStatusOrderByCreatedAtDesc(UUID sellerId, ProductStatus status, Pageable pageable);
+    Page<ProductEntity> findBySellerIdAndStatusOrderByCreatedAtDesc(UUID sellerId, ProductStatus status, Pageable pageable);
 
-    Page<Product> findByStatusOrderBySubmittedForReviewAtAsc(ProductStatus status, Pageable pageable);
+    Page<ProductEntity> findByStatusOrderBySubmittedForReviewAtAsc(ProductStatus status, Pageable pageable);
 
-    Optional<Product> findByIdAndSellerId(Long productId, UUID sellerId);
+    Optional<ProductEntity> findByIdAndSellerId(Long productId, UUID sellerId);
 
     public Long countByStatus(ProductStatus status);
 
-    public List<Product> findByTitleContainingIgnoreCaseAndStatusAndActiveTrue(String title, ProductStatus status);
+    public List<ProductEntity> findByTitleContainingIgnoreCaseAndStatusAndActiveTrue(String title, ProductStatus status);
 }
 

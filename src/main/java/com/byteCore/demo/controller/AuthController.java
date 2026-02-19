@@ -1,6 +1,6 @@
 package com.byteCore.demo.controller;
 
-import com.byteCore.demo.domain.User;
+import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.UserMapper;
 import com.byteCore.demo.dto.request.LoginRequestDTO;
 import com.byteCore.demo.dto.request.RegisterRequestDTO;
@@ -55,7 +55,7 @@ public class AuthController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        User user =  userDetails.getUser();
+        UserEntity user =  userDetails.getUser();
 
         UserResponseDTO response = userMapper.toResponseDTO(user);
 

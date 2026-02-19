@@ -1,6 +1,6 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.domain.Product;
+import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.dto.mapper.ProductMapper;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
 import com.byteCore.demo.dto.request.ProductUpdateDTO;
@@ -24,7 +24,7 @@ public class AdminProductService {
     public ProductResponseDTO getProduct(Long id) {
         log.info("Fetching product with ID: {}", id);
 
-        Product product = productRepository.findById(id)
+        ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product lookup failed. ID {} not found", id);
                     return new EntityNotFoundException("Product not found with id " + id);
@@ -37,7 +37,7 @@ public class AdminProductService {
     public ProductResponseDTO createProduct(ProductCreateDTO dto){
         log.info("Starting creation of new product: '{}'", dto.title());
 
-        Product product = productMapper.toEntity(dto);
+        ProductEntity product = productMapper.toEntity(dto);
 
         product = productRepository.save(product);
         log.info("Product created successfully with ID: {}", product.getId());
@@ -49,7 +49,7 @@ public class AdminProductService {
     public ProductResponseDTO updateProduct(Long id, ProductUpdateDTO dto){
         log.info("Updating product with ID: {}", id);
 
-        Product product = productRepository.findById(id)
+        ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Update failed. Product with ID {} not found", id);
                     return new EntityNotFoundException("Product not found with id: " + id);
@@ -69,7 +69,7 @@ public class AdminProductService {
     public void deleteProduct(Long id){
         log.info("Request to soft-delete product with ID: {}", id);
 
-        Product product = productRepository.findById(id)
+        ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Delete failed. Product with ID {} not found", id);
                     return new EntityNotFoundException("Product not found with id: " + id);
