@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @Entity
 @Table(name = "documents")
@@ -14,16 +15,16 @@ import java.time.temporal.ChronoUnit;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Document {
+public class DocumentEntity {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verification_id", nullable = false)
-    private SellerVerification sellerVerification;  // A qual verificação pertence
+    private SellerVerificationEntity sellerVerification;  // A qual verificação pertence
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)

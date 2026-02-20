@@ -1,6 +1,6 @@
 package com.byteCore.demo.dto.mapper;
 
-import com.byteCore.demo.domain.SellerVerification;
+import com.byteCore.demo.domain.SellerVerificationEntity;
 import com.byteCore.demo.dto.request.SellerVerificationRequestDTO;
 import com.byteCore.demo.dto.response.SellerVerificationResponseDTO;
 import org.mapstruct.Mapper;
@@ -11,7 +11,7 @@ public interface SellerVerificationMapper {
 
     @Mapping(target = "cpf", source = "cpf")
     @Mapping(target = "documentCount", source = "documentCount")
-    SellerVerificationResponseDTO toResponseDTO(SellerVerification entity); // entidade > response
+    SellerVerificationResponseDTO toResponseDTO(SellerVerificationEntity entity); // entidade > response
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
@@ -21,7 +21,7 @@ public interface SellerVerificationMapper {
     @Mapping(target = "reviewedBy", ignore = true)
     @Mapping(target = "submittedAt", ignore = true)
     @Mapping(target = "rejectionReason", ignore = true)
-    SellerVerification toEntity(SellerVerificationRequestDTO dto); // request > entidade
+    SellerVerificationEntity toEntity(SellerVerificationRequestDTO dto); // request > entidade
 
     default String maskCpf(String cpf) {
         if (cpf == null || cpf.length() != 11) {

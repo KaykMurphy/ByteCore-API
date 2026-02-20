@@ -35,6 +35,8 @@ public class UserEntity {
     @JsonIgnore
     private String password;
 
+    private BigDecimal averageRating;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -56,6 +58,15 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "seller")
     private List<WithdrawalRequestEntity> withdrawals = new ArrayList<>();
+
+    @Version
+    private Long balanceVersion;
+
+
+
+
+
+
 
     private void validateAmount(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -85,14 +96,18 @@ public class UserEntity {
         availableBalance = availableBalance.add(amount);
     }
 
-    public void deductFromAvailable(BigDecimal amount) {
+    public synchronized void deductFromAvailable(BigDecimal amount) {
         validateAmount(amount);
+
+        if (this.availableBalance == null) {
+            this.availableBalance = BigDecimal.ZERO;
+        }
 
         if (availableBalance.compareTo(amount) < 0) {
             throw new IllegalStateException("Insufficient available balance");
         }
 
-        availableBalance = availableBalance.subtract(amount);
+        this.availableBalance = this.availableBalance.subtract(amount);
     }
 
 

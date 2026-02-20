@@ -4,10 +4,11 @@ import com.byteCore.demo.enums.VerificationStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record SellerVerificationResponseDTO(
 
-        Long id,
+        UUID id,
         String fullName,
         String cpf,
         VerificationStatus status,

@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,12 @@ public class AuthService {
         UserEntity user = userMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.password()));
 
+        if (user.getAvailableBalance() == null) {
+            user.setAvailableBalance(BigDecimal.ZERO);
+        }
+        if (user.getPendingBalance() == null) {
+            user.setPendingBalance(BigDecimal.ZERO);
+        }
 
         userRepository.save(user);
 

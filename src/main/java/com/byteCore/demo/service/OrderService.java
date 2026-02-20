@@ -2,7 +2,9 @@ package com.byteCore.demo.service;
 
 import com.byteCore.demo.domain.*;
 import com.byteCore.demo.dto.request.OrderCreateDTO;
+import com.byteCore.demo.enums.DeliveryType;
 import com.byteCore.demo.enums.OrderStatus;
+import com.byteCore.demo.enums.ProductStatus;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,7 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OrderService {
+public class    OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
@@ -45,7 +47,20 @@ public class OrderService {
                 );
             }
 
-            if (product.getDeliveryType() == com.byteCore.demo.enums.DeliveryType.AUTOMATIC) {
+            if (product.getStatus() != ProductStatus.APPROVED) {
+                throw new IllegalStateException(
+                        "Produto não disponível para venda. Status: " + product.getStatus()
+                );
+            }
+
+            if (product.getSeller() != null && !product.getSeller().isVerifiedSeller()) {
+                throw new IllegalStateException(
+                        "Vendedor não está verificado"
+                );
+            }
+
+
+            if (product.getDeliveryType() == DeliveryType.AUTOMATIC) {
                 if (!product.hasStock(itemDto.getQuantity())) {
                     throw new IllegalStateException(
                             "Estoque insuficiente para: " + product.getTitle() +

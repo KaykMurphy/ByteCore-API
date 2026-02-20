@@ -5,8 +5,10 @@ import com.byteCore.demo.enums.DeliveryType;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.ProductRepository;
 import com.byteCore.demo.repository.ProductStockRepository;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +58,11 @@ public class DigitalProductDeliveryService {
                 log.info("Pedido #{} entregue com sucesso", order.getId());
             }
 
+        } catch (OptimisticLockException e) {
+            log.error("Concorrência detectada ao entregar pedido #{}", order.getId());
+            throw new IllegalStateException(
+                    "Produto esgotou durante a compra. Por favor, tente novamente."
+            );
         } catch (Exception e) {
             log.error("Erro ao entregar pedido #{}: {}", order.getId(), e.getMessage(), e);
             notifyAdminAboutDeliveryError(order, e.getMessage());
@@ -70,7 +77,10 @@ public class DigitalProductDeliveryService {
         log.info("Entregando {} unidade(s) de {}", quantity, product.getTitle());
 
         List<ProductStockEntity> stockItems = productStockRepository
-                .findAvailableByProductId(product.getId(), quantity);
+                .findAvailableByProductId(
+                        product.getId(),
+                        PageRequest.of(0, quantity)
+                );
 
         if (stockItems.size() < quantity) {
             throw new IllegalStateException(

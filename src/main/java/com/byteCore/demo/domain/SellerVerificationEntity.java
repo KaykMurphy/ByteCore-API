@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.print.Doc;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "seller_verifications")
@@ -19,15 +19,15 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SellerVerification {
+public class SellerVerificationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // quem está pedindo verificação
+    private UserEntity user; // quem está pedindo verificação
 
     @Column(nullable = false, length = 200)
     private String fullName;
@@ -55,7 +55,7 @@ public class SellerVerification {
     private Integer version = 1; // tentativa número X
 
     @OneToMany(mappedBy = "sellerVerification", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Document> documents = new ArrayList<>();
+    private List<DocumentEntity> documents = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -66,7 +66,7 @@ public class SellerVerification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewed_by")
-    private User reviewedBy; // qual admin aprovou/rejeitou
+    private UserEntity reviewedBy; // qual admin aprovou/rejeitou
 
     @Column(columnDefinition = "TEXT")
     private String rejectionReason;
@@ -74,24 +74,24 @@ public class SellerVerification {
     @Column
     private Instant expiresAt; // quando documentos expiram
 
-    public void addDocument(Document document) {
+    public void addDocument(DocumentEntity document) {
         documents.add(document);
         document.setSellerVerification(this);
     }
 
-    public void removeDocument(Document document) {
+    public void removeDocument(DocumentEntity document) {
         documents.remove(document);
         document.setSellerVerification(null);
     }
 
-    public void approve(User admin) {
+    public void approve(UserEntity admin) {
         status = VerificationStatus.APPROVED;
         reviewedAt = Instant.now();
         reviewedBy = admin;
         rejectionReason = null;
     }
 
-    public void reject(User admin, String reason) {
+    public void reject(UserEntity admin, String reason) {
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException("Motivo é obrigatório");
         }
@@ -108,7 +108,7 @@ public class SellerVerification {
             return false;
         }
 
-        for (Document document : documents) {
+        for (DocumentEntity document : documents) {
             if (!document.isVerified()) {
                 return false;
             }

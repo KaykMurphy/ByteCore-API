@@ -59,6 +59,17 @@ public class ProductStockEntity {
     }
 
     public void markAsSold(OrderItemEntity orderItem) {
+        if (this.sold) {
+            throw new IllegalStateException(
+                    "Product stock already sold. Stock ID: " + this.id
+            );
+        }
+        if (!this.available) {
+            throw new IllegalStateException(
+                    "Product stock not available. Stock ID: " + this.id
+            );
+        }
+
         this.sold = true;
         this.available = false;
         this.soldAt = Instant.now();

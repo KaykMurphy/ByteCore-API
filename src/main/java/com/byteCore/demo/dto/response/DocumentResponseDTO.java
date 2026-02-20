@@ -4,10 +4,11 @@ import com.byteCore.demo.enums.DocumentType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record DocumentResponseDTO(
 
-        Long id,
+        UUID id,
         DocumentType documentType,
         String filename,
         Long fileSizeBytes,

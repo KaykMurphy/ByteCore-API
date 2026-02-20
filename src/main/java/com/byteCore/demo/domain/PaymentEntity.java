@@ -78,8 +78,13 @@ public class PaymentEntity {
 
     public void calculateReleaseDate(boolean hasGoodReview){
 
-        if(paidAt ==  null) {
+        if(paidAt == null) {
             throw new IllegalStateException("Cannot calculate release date without payment date");
+        }
+
+        // Previne recálculo
+        if (moneyReleaseDate != null) {
+            return;
         }
 
         if (hasGoodReview) {
@@ -88,6 +93,8 @@ public class PaymentEntity {
         else {
             moneyReleaseDate = paidAt.plus(14, ChronoUnit.DAYS);
         }
+
+            this.sellerAmount = this.amount;
     }
 
     public void markAsReleased() {
