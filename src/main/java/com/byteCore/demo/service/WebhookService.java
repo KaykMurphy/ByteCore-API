@@ -2,20 +2,25 @@ package com.byteCore.demo.service;
 
 import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.domain.PaymentEntity;
+import com.byteCore.demo.domain.SellerVerificationEntity;
+import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.enums.OrderStatus;
 import com.byteCore.demo.enums.PaymentStatus;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.PaymentRepository;
+import com.byteCore.demo.repository.UserRepository;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.resources.payment.Payment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.query.Order;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -31,6 +36,7 @@ public class WebhookService {
     private final EmailService emailService;
     private final DigitalProductDeliveryService deliveryService;
     private final OrderService orderService;
+    private final UserRepository  userRepository;
 
     @Value("${mercadopago.webhook.secret}")
     private String webhookSecret;
@@ -128,14 +134,37 @@ public class WebhookService {
         log.info("Atualizando pagamento {} -> {}", payment.getExternalId(), newStatus);
 
         payment.setStatus(newStatus);
-        if (newStatus == PaymentStatus.APPROVED) {
+
+        if (newStatus ==  PaymentStatus.APPROVED) {
             payment.setPaidAt(Instant.now());
+
+            OrderEntity order = payment.getOrder();
+
+            if (order != null && !order.getItems().isEmpty()) {
+                UserEntity seller = order.getItems().get(0).getProduct().getSeller();
+
+                if (seller != null){
+                    boolean hasGoodReview = seller.getAverageRating() != null &&
+                            seller.getAverageRating().compareTo(new BigDecimal(4)) > 0;
+
+                    payment.calculateReleaseDate(hasGoodReview);
+                    seller.addToPendingBalance(payment.getSellerAmount());
+                    userRepository.save(seller);
+
+                    log.info("Saldo pendente de R$ {} adicionado para o vendedor {}",
+                            payment.getSellerAmount(), seller.getEmail());
+                }else {
+                    log.warn("Produto do pedido #{} não possui vendedor associado.",
+                            order.getId());
+                }
+            }
         }
+
         paymentRepository.save(payment);
 
-        OrderEntity order = payment.getOrder();
-        if (order != null) {
-            processOrderStatusChange(order, newStatus);
+        OrderEntity orderForStatus = payment.getOrder();
+        if (orderForStatus != null) {
+            processOrderStatusChange(orderForStatus, newStatus);
         }
     }
 
