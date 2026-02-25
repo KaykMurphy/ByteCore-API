@@ -23,6 +23,3 @@ public interface BannedDocumentRepository extends JpaRepository<BannedDocumentEn
     List<BannedDocumentEntity> findByDocumentType(DocumentType documentType);
 
 }
-/*
-ADICIONAR índice (será usado depois em migration):
-// @Table(indexes = @Index(name = "idx_document_hash", columnList = "documentHash"))*/
