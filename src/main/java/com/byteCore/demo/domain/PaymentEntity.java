@@ -102,8 +102,9 @@ public class PaymentEntity {
         moneyReleasedAt = Instant.now();
     }
 
-    @PrePersist
     public void onCreate() {
-        this.createdAt = Instant.now();
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
     }
 }

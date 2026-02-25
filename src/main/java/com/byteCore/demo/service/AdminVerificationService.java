@@ -79,7 +79,7 @@ public class AdminVerificationService {
                         document.getDocumentType(),
                         bannedUserId,
                         reason,
-                        admin.getName()
+                        admin.getEmail()
                 );
             } catch (IllegalStateException e) {
                 log.warn("Documento {} já estava banido: {}", document.getStoredPath(), e.getMessage());

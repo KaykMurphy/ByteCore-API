@@ -12,5 +12,4 @@ import java.util.UUID;
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     List<OrderEntity> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
-    Optional<OrderEntity> findByOrderId(Long orderId);
 }

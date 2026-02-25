@@ -21,13 +21,12 @@ public class PaymentController {
     @PostMapping("/pix/{orderId}")
     public ResponseEntity<PixPaymentResponseDTO> createPayment(
             @PathVariable Long orderId,
-            @RequestParam BigDecimal amount,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         // utilizador logado
         UserEntity user = userDetails.getUser();
 
-        PixPaymentResponseDTO response = pixPaymentService.createPixPayment(user, amount, orderId);
+        PixPaymentResponseDTO response = pixPaymentService.createPixPayment(user, orderId);
 
         return ResponseEntity.ok(response);
     }

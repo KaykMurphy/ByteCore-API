@@ -5,6 +5,7 @@ import com.byteCore.demo.domain.PaymentEntity;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.PaymentMapper;
 import com.byteCore.demo.dto.response.PixPaymentResponseDTO;
+import com.byteCore.demo.enums.OrderStatus;
 import com.byteCore.demo.enums.PaymentMethod;
 import com.byteCore.demo.enums.PaymentStatus;
 import com.byteCore.demo.repository.OrderRepository;
@@ -41,21 +42,35 @@ public class PixPaymentService {
 
 
     @Transactional
-    public PixPaymentResponseDTO createPixPayment(UserEntity user, BigDecimal amount, Long orderId) {
-        try {
-            // Buscamos o pedido para evitar o erro de ORDER_ID nulo no banco
-            OrderEntity order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new EntityNotFoundException("Pedido não encontrado"));
+    public PixPaymentResponseDTO createPixPayment(UserEntity user, Long orderId) {
 
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Pedido não encontrado"));
+
+        if (!order.getUser().getId().equals(user.getId())) {
+            throw new IllegalStateException("Pedido não pertence a este usuário");
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
+            throw new IllegalStateException("Pedido não está aguardando pagamento");
+        }
+
+        if (order.getPayment() != null) {
+            throw new IllegalStateException("Pedido já possui pagamento");
+        }
+
+        // Pega o valor do banco de dados
+        BigDecimal amount = order.getTotalAmount();
+
+        // Integração com o Mercado Pago
+        try {
             PaymentClient paymentClient = new PaymentClient();
 
-            // payer
             PaymentPayerRequest payer = PaymentPayerRequest.builder()
                     .email(user.getEmail())
                     .firstName(user.getName())
                     .build();
 
-            // cria pix
             PaymentCreateRequest request = PaymentCreateRequest.builder()
                     .transactionAmount(amount)
                     .paymentMethodId("pix")
@@ -66,10 +81,8 @@ public class PixPaymentService {
                     .dateOfExpiration(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(30))
                     .build();
 
-            // request > response > json > objeto
             Payment mpPayment = paymentClient.create(request);
 
-            /// filtra dados mp
             PaymentEntity localPayment = new PaymentEntity();
             localPayment.setExternalId(mpPayment.getId().toString());
             localPayment.setCreatedAt(mpPayment.getDateCreated().toInstant());
@@ -77,7 +90,7 @@ public class PixPaymentService {
             localPayment.setStatus(PaymentStatus.PENDING);
             localPayment.setMethod(PaymentMethod.PIX);
             localPayment.setUser(user);
-            localPayment.setOrder(order); // Vinculamos o pedido ao pagamento
+            localPayment.setOrder(order);
             localPayment.setExpiresAt(mpPayment.getDateOfExpiration().toInstant());
 
             String qrCodeBase64 = mpPayment.getPointOfInteraction().getTransactionData().getQrCodeBase64();
@@ -96,6 +109,7 @@ public class PixPaymentService {
             throw new RuntimeException("Erro interno de pagamento");
         }
     }
+
 
     // ver status
     @Transactional
