@@ -34,7 +34,7 @@ public class OrderEntity {
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private PaymentEntity payment;
 
-    @Column(precision = 3, scale = 2)
+    @Column
     private Double averageRating;
 
 

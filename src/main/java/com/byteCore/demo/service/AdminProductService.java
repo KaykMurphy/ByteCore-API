@@ -5,6 +5,7 @@ import com.byteCore.demo.dto.mapper.ProductMapper;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
 import com.byteCore.demo.dto.request.ProductUpdateDTO;
 import com.byteCore.demo.dto.response.ProductResponseDTO;
+import com.byteCore.demo.enums.ProductStatus;
 import com.byteCore.demo.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,12 @@ public class AdminProductService {
         log.info("Starting creation of new product: '{}'", dto.title());
 
         ProductEntity product = productMapper.toEntity(dto);
+
+        product.setStatus(ProductStatus.APPROVED);
+        product.setSeller(null);
+
+
+
 
         product = productRepository.save(product);
         log.info("Product created successfully with ID: {}", product.getId());
