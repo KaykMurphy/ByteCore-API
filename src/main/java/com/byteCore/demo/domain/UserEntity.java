@@ -31,8 +31,7 @@ public class UserEntity {
     @Email
     private String email;
 
-    @Column(nullable = false,  unique = true)
-    @JsonIgnore
+    @Column(nullable = false)
     private String password;
 
     private BigDecimal averageRating;

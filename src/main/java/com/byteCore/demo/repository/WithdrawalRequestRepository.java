@@ -2,7 +2,6 @@ package com.byteCore.demo.repository;
 
 import com.byteCore.demo.domain.WithdrawalRequestEntity;
 import com.byteCore.demo.enums.WithdrawalStatus;
-import org.antlr.v4.runtime.atn.SemanticContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

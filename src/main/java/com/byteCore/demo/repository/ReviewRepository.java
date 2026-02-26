@@ -21,7 +21,7 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, UUID> {
 
     Optional<ReviewEntity> findByOrderIdAndReviewerId(Long orderId, UUID reviewerId);
 
-    @Query("SELECT AVG(r.rating) FROM ReviewEntity r WHERE r.reviewedUser.id = :userId")
+    @Query("SELECT AVG(CAST(r.rating AS java.math.BigDecimal)) FROM ReviewEntity r WHERE r.reviewedUser.id = :userId")
     Double getAverageRatingByUserId(@Param("userId")UUID userId);
 
     Long countByReviewedUserId(UUID userId);

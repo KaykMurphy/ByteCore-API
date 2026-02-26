@@ -11,12 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "orders", indexes = {
+        @Index(name = "idx_orders_user_id", columnList = "user_id"),
+        @Index(name = "idx_orders_status", columnList = "status")
+})
 public class OrderEntity {
 
     @Id
@@ -33,10 +36,6 @@ public class OrderEntity {
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private PaymentEntity payment;
-
-    @Column
-    private Double averageRating;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

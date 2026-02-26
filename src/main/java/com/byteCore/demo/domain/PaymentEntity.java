@@ -11,12 +11,16 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Entity
-@Table(name = "payments")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "payments", indexes = {
+        @Index(name = "idx_payments_external_id", columnList = "externalId", unique = true),
+        @Index(name = "idx_payments_order_id", columnList = "order_id"),
+        @Index(name = "idx_payments_money_release", columnList = "moneyReleased, moneyReleaseDate")
+})
 public class PaymentEntity {
 
     @Id

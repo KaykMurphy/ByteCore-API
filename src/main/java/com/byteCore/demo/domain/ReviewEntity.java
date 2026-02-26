@@ -18,7 +18,11 @@ import java.util.UUID;
 @Table(name = "reviews",
         uniqueConstraints = @UniqueConstraint(
                 columnNames = {"order_id", "reviewer_id"} // combinacao unica
-        ))
+        ),
+        indexes = {
+                @Index(name = "idx_reviews_reviewed_user", columnList = "reviewed_user_id")
+        }
+)
 public class ReviewEntity {
 
     @Id
