@@ -7,12 +7,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "product_stock")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "product_stock", indexes = {
+        @Index(name = "idx_stock_product_available", columnList = "product_id, available, sold")
+})
 public class ProductStockEntity {
 
     @Id

@@ -1,7 +1,9 @@
 package com.byteCore.demo.service;
 
 import com.byteCore.demo.domain.*;
+import com.byteCore.demo.enums.DeliveryStatus;
 import com.byteCore.demo.enums.DeliveryType;
+import com.byteCore.demo.repository.DeliveryLogRepository;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.ProductRepository;
 import com.byteCore.demo.repository.ProductStockRepository;
@@ -12,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +29,7 @@ public class DigitalProductDeliveryService {
     private final OrderRepository orderRepository;
     private final EmailService emailService;
     private final OrderService orderService;
+    private final DeliveryLogRepository  deliveryLogRepository;
 
     @Transactional
     public void deliverOrder(OrderEntity order) {
@@ -55,10 +60,26 @@ public class DigitalProductDeliveryService {
 
                 orderService.markAsDelivered(order.getId());
 
+                DeliveryLogEntity successLog = DeliveryLogEntity.builder()
+                        .order(order)
+                        .status(DeliveryStatus.SUCCESS)
+                        .build();
+                deliveryLogRepository.save(successLog);
+
                 log.info("Pedido #{} entregue com sucesso", order.getId());
             }
 
         } catch (OptimisticLockException e) {
+
+            DeliveryLogEntity deliveryLog = DeliveryLogEntity.builder()
+                    .order(order)
+                    .status(DeliveryStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .nextRetryAt(Instant.now().plus(30, ChronoUnit.MINUTES))
+                    .build();
+
+            deliveryLogRepository.save(deliveryLog);
+
             log.error("Concorrência detectada ao entregar pedido #{}", order.getId());
             throw new IllegalStateException(
                     "Produto esgotou durante a compra. Por favor, tente novamente."
