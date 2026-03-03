@@ -1,7 +1,9 @@
 package com.byteCore.demo.controller;
 
 import com.byteCore.demo.domain.OrderEntity;
+import com.byteCore.demo.dto.mapper.OrderMapper;
 import com.byteCore.demo.dto.request.OrderCreateDTO;
+import com.byteCore.demo.dto.response.OrderResponseDTO;
 import com.byteCore.demo.security.CustomUserDetails;
 import com.byteCore.demo.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +17,15 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderMapper orderMapper;
 
     @PostMapping
-    public ResponseEntity<OrderEntity> create(@RequestBody OrderCreateDTO dto,
-                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<OrderResponseDTO> create(@RequestBody OrderCreateDTO dto,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         OrderEntity order = orderService.createOrder(userDetails.getUser(), dto);
-        return ResponseEntity.ok(order);
+
+        OrderResponseDTO response = orderMapper.toResponseDTO(order);
+
+        return ResponseEntity.ok(response);
     }
 }
