@@ -85,6 +85,16 @@ public class DigitalProductDeliveryService {
                     "Produto esgotou durante a compra. Por favor, tente novamente."
             );
         } catch (Exception e) {
+
+            DeliveryLogEntity failedLog = DeliveryLogEntity.builder()
+                    .order(order)
+                    .status(DeliveryStatus.FAILED)
+                    .errorMessage(e.getMessage())
+                    .nextRetryAt(Instant.now().plus(30, ChronoUnit.MINUTES))
+                    .build();
+
+            deliveryLogRepository.save(failedLog);
+
             log.error("Erro ao entregar pedido #{}: {}", order.getId(), e.getMessage(), e);
             notifyAdminAboutDeliveryError(order, e.getMessage());
         }

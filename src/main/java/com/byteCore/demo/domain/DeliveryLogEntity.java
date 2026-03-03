@@ -2,9 +2,7 @@ package com.byteCore.demo.domain;
 
 import com.byteCore.demo.enums.DeliveryStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -12,9 +10,11 @@ import java.util.UUID;
 
 @Builder
 @Entity
-@Table(name = "delivery_logs")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "delivery_logs")
 public class DeliveryLogEntity {
 
     @Id
