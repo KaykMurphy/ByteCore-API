@@ -106,9 +106,5 @@ public class PaymentEntity {
         moneyReleasedAt = Instant.now();
     }
 
-    public void onCreate() {
-        if (this.createdAt == null) {
-            this.createdAt = Instant.now();
-        }
-    }
+
 }
