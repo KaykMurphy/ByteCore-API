@@ -28,7 +28,7 @@ public class AdminProductService {
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Product lookup failed. ID {} not found", id);
-                    return new EntityNotFoundException("Product not found with id " + id);
+                    return new EntityNotFoundException("Product not found with id: " + id);
                 });
 
         return productMapper.toDto(product);
@@ -42,8 +42,6 @@ public class AdminProductService {
 
         product.setStatus(ProductStatus.APPROVED);
         product.setSeller(null);
-
-
 
 
         product = productRepository.save(product);

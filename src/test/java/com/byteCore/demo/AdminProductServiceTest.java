@@ -1,30 +1,28 @@
 package com.byteCore.demo;
 
-import com.byteCore.demo.domain.Product;
+import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.dto.mapper.ProductMapper;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
+import com.byteCore.demo.dto.request.ProductUpdateDTO;
 import com.byteCore.demo.dto.response.ProductResponseDTO;
-import com.byteCore.demo.enums.ProductType;
+import com.byteCore.demo.enums.ProductStatus;
 import com.byteCore.demo.repository.ProductRepository;
 import com.byteCore.demo.service.AdminProductService;
-import com.byteCore.demo.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
-import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import util.TestDataFactory;
 
-import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-
 
 @ExtendWith(MockitoExtension.class)
 public class AdminProductServiceTest {
@@ -35,59 +33,53 @@ public class AdminProductServiceTest {
     @Mock
     private ProductMapper  productMapper;
 
-    @Mock
-    private ProductService productService;
-
     @InjectMocks
     private AdminProductService adminProductService;
 
-
     @Test
+    @DisplayName("Find by id should return product responseDTO when product exists")
     void findById_shouldReturnProductResponseDTO_whenProductExists() {
 
         Long productId = 1L;
+        UUID mockSellerId = UUID.randomUUID();
 
-        Product product = new Product();
-        product.setTitle("Title admin");
-        product.setId(productId);
-        product.setActive(false);
-        product.setType(ProductType.SOFTWARE);
+        ProductEntity productEntity = new ProductEntity();
+        productEntity.setId(productId);
 
-        ProductResponseDTO responseDTO =
-                new ProductResponseDTO(
-                        productId,
-                        "Title admin",
-                        "Descrição",
-                        null,
-                        "img.png",
-                        null,
-                        ProductType.SOFTWARE
-                );
+        ProductResponseDTO responseDTO = new ProductResponseDTO(
+                productId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                mockSellerId,
+                null
+        );
 
         when(productRepository.findById(productId))
-                .thenReturn(Optional.of(product));
+                .thenReturn(Optional.of(productEntity));
 
-        when(productMapper.toDto(product))
+        when(productMapper.toDto(productEntity))
                 .thenReturn(responseDTO);
 
-        // act
+        //act
         ProductResponseDTO result =
                 adminProductService.getProduct(productId);
 
-        // assert
+        //assert
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(productId);
-        assertThat(result.title()).isEqualTo("Title admin");
 
-        verify(productRepository, times(1))
-                .findById(productId);
-
-        verify(productMapper, times(1))
-                .toDto(product);
+        verify(productRepository, times(1)).findById(productId);
+        verify(productMapper, times(1)).toDto(productEntity);
     }
 
+
     @Test
-    void shouldThrowEntityNotFoundException_whenProductDoesNotExists() {
+    @DisplayName("Should throw exception when product does not exist")
+    void get_Product_shouldThrowException_whenProductDoesNotExist() {
 
         Long productId = 1L;
 
@@ -96,73 +88,164 @@ public class AdminProductServiceTest {
 
         assertThatThrownBy(() -> adminProductService.getProduct(productId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Product not found with id "+productId);
+                .hasMessage("Product not found with id: " + productId);
 
         verify(productRepository, times(1))
                 .findById(productId);
 
-        verify(productMapper, never())
-                .toDto(any());
+    }
+
+    @Test
+    @DisplayName("Should create product successfully")
+    void createProduct_shouldCreateProductSuccessfully() {
+
+        Long productId = 1L;
+        ProductCreateDTO dto = TestDataFactory.validProductCreateDTO();
+
+        ProductEntity  productEntity = new ProductEntity();
+        productEntity.setTitle(dto.title());
+
+
+        ProductEntity savedProductEntity = new  ProductEntity();
+        savedProductEntity.setId(productId);
+        savedProductEntity.setTitle(dto.title());
+
+
+        ProductResponseDTO responseDTO = new ProductResponseDTO(
+                productId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+
+        when(productMapper.toEntity(dto))
+                .thenReturn(productEntity);
+
+        when(productRepository.save(productEntity))
+                .thenReturn(savedProductEntity);
+
+        when(productMapper.toDto(savedProductEntity))
+                .thenReturn(responseDTO);
+
+        //act
+        ProductResponseDTO result = adminProductService.createProduct(dto);
+
+
+        assertThat(result).isNotNull();
+        assertThat(result.id()).isEqualTo(productId);
+
+        verify(productMapper, times(1)).toEntity(dto);
+        verify(productRepository, times(1)).save(productEntity);
+        verify(productMapper, times(1)).toDto(savedProductEntity);
+
+        assertThat(productEntity.getStatus()).isEqualTo(ProductStatus.APPROVED);
+        assertThat(productEntity.getSeller()).isNull();
     }
 
 
     @Test
-    void createProduct_shouldCreateProductSuccessfully() {
+    @DisplayName("Should update product successfully")
+    void updateProduct_shouldUpdateProductSuccessfully() {
 
-        ProductCreateDTO createDTO = new ProductCreateDTO(
-                "Notebook",
-                "Notebook Gamer",
-                new BigDecimal("4500.00"),
-                "img.png",
-                ProductType.SOFTWARE
+        Long productId = 1L;
+
+        ProductUpdateDTO dto = TestDataFactory.validProductUpdateDTO();
+
+        ProductEntity existingProduct = new ProductEntity();
+        existingProduct.setId(productId);
+
+        ProductEntity savedProductEntity = new ProductEntity();
+        savedProductEntity.setId(productId);
+
+        ProductResponseDTO responseDTO = new ProductResponseDTO(
+                productId, null, null, null, null, null, null, null, null
         );
 
-        Product product = new Product();
-        product.setTitle("Notebook");
-        product.setDescription("Notebook Gamer");
-        product.setPrice(new BigDecimal("4500.00"));
+        when(productRepository.findById(productId))
+                .thenReturn(Optional.of(existingProduct));
 
-        Product savedProduct = new Product();
-        savedProduct.setId(1L);
-        savedProduct.setTitle("Notebook");
-        savedProduct.setDescription("Notebook Gamer");
-        savedProduct.setType(ProductType.SOFTWARE);
-        savedProduct.setPrice(new BigDecimal("4500.00"));
-        savedProduct.setImageUrl("img.png");
+        when(productRepository.save(existingProduct))
+                .thenReturn(savedProductEntity);
 
-        ProductResponseDTO response = new ProductResponseDTO(
-                1L,
-                "Notebook",
-                "Notebook Gamer",
-                new BigDecimal("4500.00"),
-                "img.png",
-                null,
-                ProductType.SOFTWARE
-        );
+        when(productMapper.toDto(savedProductEntity))
+                .thenReturn(responseDTO);
 
-        // Arrange
-        when(productMapper.toEntity(createDTO)).thenReturn(product);
-        when(productRepository.save(product)).thenReturn(savedProduct);
-        when(productMapper.toDto(savedProduct)).thenReturn(response);
+        // act
+        ProductResponseDTO result = adminProductService.updateProduct(productId, dto);
 
-        // Act
-        ProductResponseDTO result = adminProductService.createProduct(createDTO);
+        // assert
+        assertThat(result).isNotNull();
+        assertThat(result.id()).isEqualTo(productId);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(1L, result.id());
-        assertEquals("Notebook", result.title());
-        assertEquals("Notebook Gamer", result.description());
-        assertEquals(new BigDecimal("4500.00"), result.price());
+        // verify
+        verify(productRepository, times(1)).findById(productId);
+        verify(productMapper, times(1)).updateEntityFromDto(dto, existingProduct);
+        verify(productRepository, times(1)).save(existingProduct);
+        verify(productMapper, times(1)).toDto(savedProductEntity);
 
-        // Verify
-        verify(productMapper, times(1)).toEntity(createDTO);
-        verify(productRepository, times(1)).save(product);
-        verify(productMapper, times(1)).toDto(savedProduct);
-
-        verifyNoMoreInteractions(productMapper, productRepository);
     }
 
 
+    @Test
+    @DisplayName("Should throw exception when product does not exist")
+    void updateProduct_shouldThrowException_whenProductDoesNotExist() {
+        Long productId = 1L;
+
+        when(productRepository.findById(productId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> adminProductService.updateProduct(
+                productId, TestDataFactory.validProductUpdateDTO()))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Product not found with id: " + productId);
+
+        verify(productRepository, times(1)).findById(productId);
+
+    }
+
+
+    @Test
+    @DisplayName("Should delete product successfully")
+    void  deleteProduct_shouldDeleteProductSuccessfully() {
+        Long productId = 1L;
+
+        ProductEntity  product = new ProductEntity();
+        product.setId(productId);
+        product.setActive(true);
+
+        when(productRepository.findById(productId))
+                .thenReturn(Optional.of(product));
+
+
+        adminProductService.deleteProduct(productId);
+
+        assertThat(product.isActive()).isFalse();
+
+        verify(productRepository, times(1)).findById(productId);
+        verify(productRepository, times(1)).save(product);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when product does not exist")
+    void deleteProduct_shouldThrowException_whenProductDoesNotExist() {
+
+        Long productId = 1L;
+
+        when(productRepository.findById(productId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> adminProductService.deleteProduct(productId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Product not found with id: " + productId);
+
+        verify(productRepository).findById(productId);
+        verify(productRepository, never()).save(any());
+    }
 
 }
