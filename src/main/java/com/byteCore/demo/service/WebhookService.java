@@ -35,6 +35,7 @@ public class WebhookService {
     private final DigitalProductDeliveryService deliveryService;
     private final OrderService orderService;
     private final UserRepository  userRepository;
+    private final PaymentClient paymentClient;
 
     @Value("${mercadopago.webhook.secret}")
     private String webhookSecret;
@@ -107,8 +108,7 @@ public class WebhookService {
 
     private void processPaymentUpdate(String externalId) {
         try {
-            PaymentClient client = new PaymentClient();
-            Payment mpPayment = client.get(Long.parseLong(externalId));
+            Payment mpPayment = paymentClient.get(Long.parseLong(externalId));
 
             PaymentEntity localPayment = paymentRepository.findByExternalId(externalId)
                     .orElseThrow(() -> new RuntimeException(
@@ -197,7 +197,12 @@ public class WebhookService {
         log.info("Pedido #{} APROVADO - Iniciando entrega automática", order.getId());
 
         try {
-            emailService.sendPaymentConfirmation(order);
+            String toEmail = order.getDeliveryEmail();
+            String userName = order.getUser().getName();
+            Long orderId = order.getId();
+            BigDecimal totalAmount = order.getTotalAmount();
+
+            emailService.sendPaymentConfirmation(toEmail, userName, orderId, totalAmount);
 
             deliveryService.deliverOrder(order);
 

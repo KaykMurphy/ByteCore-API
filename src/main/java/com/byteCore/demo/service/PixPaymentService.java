@@ -36,6 +36,7 @@ public class PixPaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final PaymentMapper paymentMapper;
+    private final PaymentClient paymentClient;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -59,13 +60,9 @@ public class PixPaymentService {
             throw new IllegalStateException("Pedido já possui pagamento");
         }
 
-        // Pega o valor do banco de dados
         BigDecimal amount = order.getTotalAmount();
 
-        // Integração com o Mercado Pago
         try {
-            PaymentClient paymentClient = new PaymentClient();
-
             PaymentPayerRequest payer = PaymentPayerRequest.builder()
                     .email(user.getEmail())
                     .firstName(user.getName())
@@ -111,26 +108,23 @@ public class PixPaymentService {
     }
 
 
-    // ver status
     @Transactional
     public PixPaymentResponseDTO getPaymentStatus(Long paymentId) {
         PaymentEntity localPayment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new EntityNotFoundException("Pagamento não encontrado"));
 
         if (localPayment.getStatus() == PaymentStatus.PENDING) {
-            syncStatusWithMercadoPago(localPayment); // sync mp
+            syncStatusWithMercadoPago(localPayment);
         }
 
         return paymentMapper.toDto(localPayment, null, localPayment.getQrCode(), null);
     }
 
-    // sync mp
     private void syncStatusWithMercadoPago(PaymentEntity localPayment) {
         try {
             log.info("Sincronizando status para o pagamento local ID: {}", localPayment.getId());
 
-            PaymentClient client = new PaymentClient();
-            Payment mpPayment = client.get(Long.parseLong(localPayment.getExternalId()));
+            Payment mpPayment = paymentClient.get(Long.parseLong(localPayment.getExternalId()));
 
             PaymentStatus currentMpStatus = mapStatus(mpPayment.getStatus());
 
@@ -148,7 +142,6 @@ public class PixPaymentService {
         }
     }
 
-    // map status
     private PaymentStatus mapStatus(String mpStatus) {
         if (mpStatus == null) {
             return PaymentStatus.PENDING;
