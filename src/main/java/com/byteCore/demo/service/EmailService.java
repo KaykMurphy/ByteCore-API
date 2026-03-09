@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -28,22 +29,22 @@ public class EmailService {
     private String baseUrl;
 
     @Async
-    public void sendPaymentConfirmation(OrderEntity order) {
+    public void sendPaymentConfirmation(String toEmail, String userName, Long orderId, BigDecimal totalAmount) {
         try {
-            log.info("Enviando confirmação de pagamento para: {}", order.getDeliveryEmail());
+            log.info("Enviando confirmação de pagamento para: {}", toEmail);
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(
                     message,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name()
+                    java.nio.charset.StandardCharsets.UTF_8.name()
             );
 
             helper.setFrom(senderEmail);
-            helper.setTo(order.getDeliveryEmail());
-            helper.setSubject("Pagamento Confirmado - Pedido #" + order.getId());
+            helper.setTo(toEmail);
+            helper.setSubject("Pagamento Confirmado - Pedido #" + orderId);
 
-            String content = buildPaymentConfirmationEmail(order);
+            String content = buildPaymentConfirmationEmail(userName, orderId, totalAmount);
             helper.setText(content, true);
 
             mailSender.send(message);
@@ -85,7 +86,7 @@ public class EmailService {
         }
     }
 
-    private String buildPaymentConfirmationEmail(OrderEntity order) {
+    private String buildPaymentConfirmationEmail(String userName, Long orderId, java.math.BigDecimal totalAmount) {
         return String.format("""
             <html>
             <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
@@ -114,9 +115,9 @@ public class EmailService {
             </body>
             </html>
             """,
-                order.getUser().getName(),
-                order.getId(),
-                order.getTotal()
+                userName,
+                orderId,
+                totalAmount
         );
     }
 
