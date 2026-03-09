@@ -41,6 +41,7 @@ public class ProductEntity {
     @Column(nullable = false, length = 500)
     private String imageUrl;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean active = true;
 
@@ -51,16 +52,20 @@ public class ProductEntity {
     @Column(length = 100)
     private String platform;
 
+    @Builder.Default
     @Column(length = 50)
     private String region = "GLOBAL";
 
+    @Builder.Default
     @Column(nullable = false)
     private Long availableStock = 0L;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private DeliveryType deliveryType = DeliveryType.MANUAL;
 
+    @Builder.Default
     @Column
     private Integer estimatedDeliveryMinutes = 5;
 
@@ -70,6 +75,7 @@ public class ProductEntity {
     @Column(columnDefinition = "TEXT")
     private String importantNotes;
 
+    @Builder.Default
     @Column(nullable = false)
     private Long totalSold = 0L;
 
@@ -88,6 +94,7 @@ public class ProductEntity {
     @JoinColumn(name = "seller_id")
     private UserEntity seller;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private ProductStatus status = ProductStatus.DRAFT;
@@ -133,7 +140,6 @@ public class ProductEntity {
     }
 
 
-    // Vendedor submete produto para análise
     public void submitForReview() {
 
         if (status != ProductStatus.DRAFT) {
@@ -144,7 +150,6 @@ public class ProductEntity {
         this.submittedForReviewAt = Instant.now();
     }
 
-    // Admin aprova produto
     public void approveProduct(UserEntity admin) {
 
         if (status != ProductStatus.PENDING_REVIEW) {
@@ -158,7 +163,6 @@ public class ProductEntity {
         this.active = true;
     }
 
-    // Admin rejeita produto
     public void rejectProduct(UserEntity admin, String reason) {
 
         if (reason == null || reason.isBlank()) {
@@ -175,7 +179,6 @@ public class ProductEntity {
         this.active = false;
     }
 
-    // Vendedor pode editar?
     public boolean canBeEditedBySeller() {
         return status == ProductStatus.DRAFT
                 || status == ProductStatus.REJECTED;
