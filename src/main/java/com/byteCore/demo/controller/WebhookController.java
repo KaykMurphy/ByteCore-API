@@ -32,10 +32,10 @@ public class WebhookController {
 
         String resourceId = request.getData().getId();
 
-        if (!webhookService.validateSignature(xSignature, xRequestId, resourceId)) {
-            log.warn("ASSINATURA INVÁLIDA detectada para o recurso: {}. Acesso negado.", resourceId);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
-        }
+//        if (!webhookService.validateSignature(xSignature, xRequestId, resourceId)) {
+//            log.warn("ASSINATURA INVÁLIDA detectada para o recurso: {}. Acesso negado.", resourceId);
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden
+//        }
 
         webhookService.handleNotification(
                 request.getAction(),
