@@ -2,6 +2,7 @@ package com.byteCore.demo.service;
 
 import com.byteCore.demo.domain.*;
 import com.byteCore.demo.dto.request.OrderCreateDTO;
+import com.byteCore.demo.dto.request.OrderItemRequestDTO;
 import com.byteCore.demo.enums.DeliveryType;
 import com.byteCore.demo.enums.OrderStatus;
 import com.byteCore.demo.enums.ProductStatus;
@@ -34,7 +35,7 @@ public class    OrderService {
                 .deliveryEmail(user.getEmail()) // Usa email do usuário
                 .build();
 
-        for (var itemDto : dto.getItems()) {
+        for (OrderItemRequestDTO itemDto : dto.getItems()) {
 
             ProductEntity product = productRepository.findById(itemDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException(
@@ -69,7 +70,7 @@ public class    OrderService {
                 }
             }
 
-            OrderItemEntity item = OrderItemEntity.builder()
+                OrderItemEntity item = OrderItemEntity.builder()
                     .product(product)
                     .quantity(itemDto.getQuantity())
                     .price(product.getPrice())
