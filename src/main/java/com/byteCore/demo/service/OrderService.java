@@ -50,11 +50,13 @@ public class    OrderService {
 
             if (product.getStatus() != ProductStatus.APPROVED) {
                 throw new IllegalStateException(
-                        "Produto não disponível para venda. Status: " + product.getStatus()
+                        "Produto não disponível para venda. Status: " +
+                                product.getStatus()
                 );
             }
 
-            if (product.getSeller() != null && !product.getSeller().isVerifiedSeller()) {
+            if (product.getSeller() != null && !product.getSeller()
+                    .isVerifiedSeller()) {
                 throw new IllegalStateException(
                         "Vendedor não está verificado"
                 );
@@ -65,7 +67,8 @@ public class    OrderService {
                 if (!product.hasStock(itemDto.getQuantity())) {
                     throw new IllegalStateException(
                             "Estoque insuficiente para: " + product.getTitle() +
-                                    " (Disponível: " + product.getAvailableStock() + ")"
+                                    " (Disponível: " +
+                                    product.getAvailableStock() + ")"
                     );
                 }
             }

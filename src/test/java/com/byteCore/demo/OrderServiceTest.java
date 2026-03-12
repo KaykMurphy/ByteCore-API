@@ -47,14 +47,14 @@ public class OrderServiceTest {
         OrderEntity order = new OrderEntity();
         order.setId(1L);
 
-        ProductEntity product = new  ProductEntity();
+        ProductEntity product = new ProductEntity();
         product.setId(1L);
         product.setStatus(ProductStatus.APPROVED);
         product.setActive(true);
         product.setDeliveryType(DeliveryType.MANUAL);
         product.setPrice(new BigDecimal("100.321321"));
 
-        OrderItemRequestDTO  orderItemRequestDTO = new OrderItemRequestDTO();
+        OrderItemRequestDTO orderItemRequestDTO = new OrderItemRequestDTO();
         orderItemRequestDTO.setProductId(product.getId());
         orderItemRequestDTO.setQuantity(1);
 
@@ -83,5 +83,71 @@ public class OrderServiceTest {
     }
 
 
+    @Test
+    void createOrder_shouldThrowException_whenProductIsInactive() {
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail("email.gmail.com");
+
+        ProductEntity product = new ProductEntity();
+        product.setId(1L);
+        product.setTitle("title");
+        product.setActive(false);
+
+        OrderItemRequestDTO orderItemRequestDTO = new OrderItemRequestDTO();
+        orderItemRequestDTO.setProductId(product.getId());
+
+        OrderCreateDTO itemDto = new OrderCreateDTO();
+        itemDto.setItems(List.of(orderItemRequestDTO));
+
+        when(productRepository.findById(product.getId()))
+                .thenReturn(Optional.of(product));
+
+        IllegalStateException exception =
+                Assertions.assertThrows(IllegalStateException.class,
+                () -> orderService.createOrder(userEntity, itemDto));
+
+        Assertions.assertEquals("Produto inativo: " +
+                product.getTitle(), exception.getMessage());
+
+        verify(orderRepository, never()).save(any(OrderEntity.class));
+    }
+
+    @Test
+    void createOrder_shouldThrowException_whenProductStatusIsNotApproved() {
+
+        UserEntity userEntity = new  UserEntity();
+        userEntity.setEmail("email.gmail.com");
+
+        ProductEntity product = new  ProductEntity();
+        product.setId(1L);
+        product.setTitle("title");
+        product.setActive(true);
+        product.setStatus(ProductStatus.REJECTED);
+
+        OrderItemRequestDTO orderItemRequestDTO = new OrderItemRequestDTO();
+        orderItemRequestDTO.setProductId(product.getId());
+
+        OrderCreateDTO itemDto = new OrderCreateDTO();
+        itemDto.setItems(List.of(orderItemRequestDTO));
+
+        when(productRepository.findById(product.getId()))
+                .thenReturn(Optional.of(product));
+
+        IllegalStateException exception =
+                Assertions.assertThrows(
+                        IllegalStateException.class,
+                        () -> orderService.createOrder(userEntity, itemDto)
+                );
+
+        Assertions.assertEquals(
+                "Produto não disponível para venda. Status: " +
+                        product.getStatus(),  exception.getMessage()
+                );
+
+        verify(orderRepository, never()).save(any(OrderEntity.class));
+    }
 
 }
+
+
