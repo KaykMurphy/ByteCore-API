@@ -1,5 +1,9 @@
 # ByteCore API
 
+> **⚠️ PROJETO EM DESENVOLVIMENTO ATIVO**
+>
+> Este projeto está em construção. Algumas funcionalidades podem estar incompletas, sujeitas a mudanças ou ainda não totalmente testadas. A cobertura de testes está sendo expandida progressivamente.
+
 API REST para marketplace de produtos digitais com entrega automática, sistema de verificação de vendedores e integração com Mercado Pago (PIX).
 
 > Segunda versão da [bytemarket](https://github.com/KaykMurphy/bytemarket) — reescrita do zero com arquitetura mais sólida, boas práticas e maior facilidade de manutenção.
@@ -20,18 +24,18 @@ API REST para marketplace de produtos digitais com entrega automática, sistema 
 
 ## Funcionalidades
 
-| Módulo | Descrição |
-|---|---|
-| Auth | Registro, login com JWT, endpoint `/me` |
-| Produtos | CRUD público (paginado + busca), aprovação por admin |
-| Pedidos | Criação com validação de estoque e status do vendedor |
-| Pagamentos | PIX via Mercado Pago, webhook com validação de assinatura HMAC-SHA256 |
-| Entrega digital | Entrega automática de keys/contas por e-mail após confirmação do pagamento |
-| Verificação de vendedor | Fluxo de submissão → análise → aprovação/rejeição/ban |
-| Saques | Solicitação via PIX com limite diário de R$ 500 |
-| Reviews | Avaliação de vendedores pós-entrega (máx. 2 edições) |
-| Blacklist | Documentos banidos por hash SHA-256 |
-| Jobs | Liberação automática de saldo (cron diário às 03h) |
+| Módulo | Descrição | Status |
+|---|---|---|
+| Auth | Registro, login com JWT, endpoint `/me` | ✅ Implementado |
+| Produtos | CRUD público (paginado + busca), aprovação por admin | ✅ Implementado |
+| Pedidos | Criação com validação de estoque e status do vendedor | ✅ Implementado |
+| Pagamentos | PIX via Mercado Pago, webhook com validação de assinatura HMAC-SHA256 | ✅ Implementado |
+| Entrega digital | Entrega automática de keys/contas por e-mail após confirmação do pagamento | ✅ Implementado |
+| Verificação de vendedor | Fluxo de submissão → análise → aprovação/rejeição/ban | ✅ Implementado |
+| Saques | Solicitação via PIX com limite diário de R$ 500 | ✅ Implementado |
+| Reviews | Avaliação de vendedores pós-entrega (máx. 2 edições) | ✅ Implementado |
+| Blacklist | Documentos banidos por hash SHA-256 | ✅ Implementado |
+| Jobs | Liberação automática de saldo (cron diário às 03h) | ✅ Implementado |
 
 ---
 
@@ -144,7 +148,14 @@ Por padrão usa H2 em memória. Para PostgreSQL, configure o `application.proper
 ./mvnw test
 ```
 
-Testes unitários com **JUnit 5** + **Mockito** cobrindo `ProductService` e `AdminProductService`.
+> **🚧 Em expansão** — A cobertura de testes está sendo incrementada gradualmente.
+> Atualmente cobertos com **JUnit 5** + **Mockito**:
+
+| Classe | Testes | Cobertura |
+|---|---|---|
+| `AdminProductService` | CRUD completo + exceções | ✅ |
+| `OrderService` | Criação de pedidos + validações | ✅ |
+| Demais serviços | — | 🔄 Em andamento |
 
 ---
 
@@ -162,7 +173,25 @@ exceptions/     → handlers globais
 enums/          → roles, status, tipos
 validation/     → validators customizados
 ```
-Made with ☕, discipline, and attention to detail.
 
-Developed by Kayk Murphy
-Backend Developer focused on scalable systems and clean architecture.
+---
+
+## Status do Projeto
+
+```
+🟢 Core da API         → Funcional
+🟢 Autenticação JWT    → Funcional
+🟢 Pagamentos PIX      → Funcional
+🟢 Entrega digital     → Funcional
+🟡 Testes unitários    → Em expansão
+🟡 Validação webhook   → Temporariamente desabilitada (dev)
+🔴 Testes integração   → Não iniciados
+```
+
+---
+
+---
+
+Built with ☕, discipline, and attention to detail.
+
+Developed by **[Kayk Edmar](https://github.com/KaykMurphy)** — Backend Developer focused on scalable systems and clean architecture.
