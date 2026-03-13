@@ -8,11 +8,12 @@ import com.byteCore.demo.dto.request.OrderCreateDTO;
 import com.byteCore.demo.dto.request.OrderItemRequestDTO;
 import com.byteCore.demo.enums.DeliveryType;
 import com.byteCore.demo.enums.ProductStatus;
+import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.ProductRepository;
 import com.byteCore.demo.service.OrderService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,10 +40,40 @@ public class OrderServiceTest {
     private OrderService orderService;
 
     @Test
+    void createOrder_shouldThrowException_whenProductNotFound() {
+
+        UserEntity buyer = new UserEntity();
+        buyer.setEmail("comprador@gmail.com");
+
+        OrderItemRequestDTO orderItemRequestDTO = new OrderItemRequestDTO();
+        orderItemRequestDTO.setProductId(1L);
+
+        OrderCreateDTO itemDto = new OrderCreateDTO();
+        itemDto.setItems(List.of(orderItemRequestDTO));
+
+        when(productRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException exception =
+                Assertions.assertThrows(
+                        EntityNotFoundException.class,
+                        () -> orderService.createOrder(buyer, itemDto)
+                );
+
+        Assertions.assertEquals(
+                "Produto não encontrado: 1",
+                exception.getMessage()
+        );
+
+        verify(orderRepository, never()).save(any(OrderEntity.class));
+    }
+
+
+    @Test
     void createOrder_shouldCreateOrderSuccessfully() {
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail("email@gmail.com");
+        UserEntity buyer = new UserEntity();
+        buyer.setEmail("comprador@gmail.com");
 
         OrderEntity order = new OrderEntity();
         order.setId(1L);
@@ -61,17 +92,14 @@ public class OrderServiceTest {
         OrderCreateDTO itemDto = new OrderCreateDTO();
         itemDto.setItems(List.of(orderItemRequestDTO));
 
-
         when(productRepository.findById(product.getId()))
                 .thenReturn(Optional.of(product));
-
 
         when(orderRepository.save(Mockito.any(OrderEntity.class)))
                 .thenReturn(order);
 
         //act
-        OrderEntity result = orderService.createOrder(userEntity, itemDto);
-
+        OrderEntity result = orderService.createOrder(buyer, itemDto);
 
         //assert
         Assertions.assertNotNull(result);
@@ -79,15 +107,14 @@ public class OrderServiceTest {
 
         verify(productRepository, times(1)).findById(product.getId());
         verify(orderRepository, times(1)).save(Mockito.any(OrderEntity.class));
-
     }
 
 
     @Test
     void createOrder_shouldThrowException_whenProductIsInactive() {
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail("email.gmail.com");
+        UserEntity buyer = new UserEntity();
+        buyer.setEmail("comprador@gmail.com");
 
         ProductEntity product = new ProductEntity();
         product.setId(1L);
@@ -105,7 +132,7 @@ public class OrderServiceTest {
 
         IllegalStateException exception =
                 Assertions.assertThrows(IllegalStateException.class,
-                () -> orderService.createOrder(userEntity, itemDto));
+                        () -> orderService.createOrder(buyer, itemDto));
 
         Assertions.assertEquals("Produto inativo: " +
                 product.getTitle(), exception.getMessage());
@@ -116,10 +143,10 @@ public class OrderServiceTest {
     @Test
     void createOrder_shouldThrowException_whenProductStatusIsNotApproved() {
 
-        UserEntity userEntity = new  UserEntity();
-        userEntity.setEmail("email.gmail.com");
+        UserEntity buyer = new UserEntity();
+        buyer.setEmail("comprador@gmail.com");
 
-        ProductEntity product = new  ProductEntity();
+        ProductEntity product = new ProductEntity();
         product.setId(1L);
         product.setTitle("title");
         product.setActive(true);
@@ -137,17 +164,98 @@ public class OrderServiceTest {
         IllegalStateException exception =
                 Assertions.assertThrows(
                         IllegalStateException.class,
-                        () -> orderService.createOrder(userEntity, itemDto)
+                        () -> orderService.createOrder(buyer, itemDto)
                 );
 
         Assertions.assertEquals(
                 "Produto não disponível para venda. Status: " +
-                        product.getStatus(),  exception.getMessage()
-                );
+                        product.getStatus(), exception.getMessage()
+        );
 
         verify(orderRepository, never()).save(any(OrderEntity.class));
     }
 
+    @Test
+    void createOrder_shouldThrowException_whenSellerIsNotVerified() {
+
+        UserEntity buyer = new UserEntity();
+        buyer.setEmail("comprador@gmail.com");
+
+        UserEntity seller = new UserEntity();
+        seller.setEmail("vendedor@gmail.com");
+
+        ProductEntity product = new ProductEntity();
+        product.setId(1L);
+        product.setTitle("title");
+        product.setActive(true);
+        product.setStatus(ProductStatus.APPROVED);
+        product.setSeller(seller);
+
+        OrderItemRequestDTO orderItemRequestDTO = new OrderItemRequestDTO();
+        orderItemRequestDTO.setProductId(product.getId());
+
+        OrderCreateDTO itemDto = new OrderCreateDTO();
+        itemDto.setItems(List.of(orderItemRequestDTO));
+
+        when(productRepository.findById(product.getId()))
+                .thenReturn(Optional.of(product));
+
+        IllegalStateException exception =
+                Assertions.assertThrows(
+                        IllegalStateException.class,
+                        () -> orderService.createOrder(buyer, itemDto)
+                );
+
+        Assertions.assertEquals(
+                "Vendedor não está verificado",
+                exception.getMessage()
+        );
+
+        verify(orderRepository, never()).save(any(OrderEntity.class));
+    }
+
+
+    @Test
+    void createOrder_shouldThrowException_whenInsufficientStock() {
+
+        UserEntity buyer = new UserEntity();
+        buyer.setEmail("comprador@gmail.com");
+
+        UserEntity seller = new UserEntity();
+        seller.setEmail("vendedor@gmail.com");
+        seller.setRole(Role.VERIFIED_SELLER);
+
+        ProductEntity product = new ProductEntity();
+        product.setId(1L);
+        product.setTitle("title");
+        product.setActive(true);
+        product.setStatus(ProductStatus.APPROVED);
+        product.setDeliveryType(DeliveryType.AUTOMATIC);
+        product.setSeller(seller);
+        product.setAvailableStock(5L);
+
+        OrderItemRequestDTO itemDto = new OrderItemRequestDTO();
+        itemDto.setProductId(product.getId());
+        itemDto.setQuantity(10);
+
+        OrderCreateDTO order = new OrderCreateDTO();
+        order.setItems(List.of(itemDto));
+
+        when(productRepository.findById(product.getId()))
+                .thenReturn(Optional.of(product));
+
+        IllegalStateException exception =
+                Assertions.assertThrows(
+                        IllegalStateException.class,
+                        () -> orderService.createOrder(buyer, order)
+                );
+
+        Assertions.assertEquals(
+                "Estoque insuficiente para: " + product.getTitle()
+                        + " (Disponível: " + product.getAvailableStock() + ")",
+                exception.getMessage()
+        );
+
+        verify(orderRepository, never()).save(any(OrderEntity.class));
+    }
 }
-
-
