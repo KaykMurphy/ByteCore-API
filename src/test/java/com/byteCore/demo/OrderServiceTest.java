@@ -7,6 +7,7 @@ import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.request.OrderCreateDTO;
 import com.byteCore.demo.dto.request.OrderItemRequestDTO;
 import com.byteCore.demo.enums.DeliveryType;
+import com.byteCore.demo.enums.OrderStatus;
 import com.byteCore.demo.enums.ProductStatus;
 import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.repository.OrderRepository;
@@ -22,8 +23,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
@@ -258,4 +261,109 @@ public class OrderServiceTest {
 
         verify(orderRepository, never()).save(any(OrderEntity.class));
     }
+
+    @Test
+    void findById_shouldFindByIdSuccessfully() {
+        OrderEntity order = new OrderEntity();
+        order.setId(1L);
+
+        when(orderRepository.findById(order.getId()))
+                .thenReturn(Optional.of(order));
+
+        OrderEntity result = orderService.findById(order.getId());
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(order.getId(), result.getId());
+
+        verify(orderRepository, times(1)).findById(order.getId());
+    }
+
+    @Test
+    void findById_shouldThrowException_whenOrderNotFound() {
+
+        Long idBusca = 1L;
+
+        when(orderRepository.findById(idBusca))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException exception =
+                Assertions.assertThrows(
+                        EntityNotFoundException.class,
+                        () -> orderService.findById(idBusca)
+                );
+
+        Assertions.assertEquals(
+                "Pedido não encontrado: " + idBusca,
+                exception.getMessage()
+        );
+
+        verify(orderRepository, times(1)).findById(idBusca);
+    }
+
+    @Test
+    void findByUser_shouldFindByUserSuccessfully() {
+
+        UserEntity user = new UserEntity();
+        user.setId(UUID.randomUUID());
+
+        OrderEntity order = new OrderEntity();
+        order.setId(1L);
+
+        List<OrderEntity> list = new ArrayList<>();
+        list.add(order);
+
+        when(orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId()))
+                .thenReturn(list);
+
+        List<OrderEntity> result = orderService.findByUser(user);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(order.getId(), result.get(0).getId());
+
+        verify(orderRepository, times(1))
+                .findByUserIdOrderByCreatedAtDesc(user.getId());
+
+    }
+
+    @Test
+    void markAsDelivered_shouldMarkAsDeliveredSuccessfully() {
+
+
+        OrderEntity order = new OrderEntity();
+        order.setId(1L);
+        order.setStatus(OrderStatus.PAID);
+
+        when(orderRepository.findById(order.getId()))
+                .thenReturn(Optional.of(order));
+
+        orderService.markAsDelivered(order.getId());
+
+        Assertions.assertEquals(OrderStatus.DELIVERED, order.getStatus());
+
+        verify(orderRepository, times(1)).save(order);
+    }
+
+    @Test
+    void markAsDelivered_shouldThrowException_whenOrderNotFound() {
+
+        OrderEntity order = new OrderEntity();
+        order.setId(1L);
+        order.setStatus(OrderStatus.CANCELLED);
+
+
+        when(orderRepository.findById(order.getId()))
+                .thenReturn(Optional.of(order));
+
+        orderService.markAsDelivered(order.getId());
+
+        Assertions.assertEquals(OrderStatus.CANCELLED, order.getStatus());
+
+        verify(orderRepository, never()).save(any(OrderEntity.class));
+    }
+
+
+
+
+
 }
