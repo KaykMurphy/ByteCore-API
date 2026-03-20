@@ -12,9 +12,12 @@ import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.PaymentRepository;
 import com.byteCore.demo.service.PixPaymentService;
 import com.mercadopago.client.payment.PaymentClient;
+import com.mercadopago.exceptions.MPApiException;
+import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.payment.PaymentPointOfInteraction;
 import com.mercadopago.resources.payment.PaymentTransactionData;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -139,4 +144,267 @@ public class PixPaymentServiceTest {
         Assertions.assertEquals(createdAt.toInstant(), savedPayment.getCreatedAt());
         Assertions.assertEquals(expiresAt.toInstant(), savedPayment.getExpiresAt());
     }
-}
+
+
+    @Test
+    void createPixPayment_shouldThrowException_whenOrderNotFound() throws Exception {
+
+        UserEntity user = new  UserEntity();
+        user.setId(UUID.randomUUID());
+
+        Long orderId = 1L;
+
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException exception =
+                Assertions.assertThrows(
+                        EntityNotFoundException.class,
+                        () -> pixPaymentService.createPixPayment(user, orderId)
+                );
+
+        Assertions.assertEquals(
+                "Pedido não encontrado",
+                exception.getMessage()
+        );
+
+        verify(orderRepository, times(1))
+                .findById(orderId);
+
+        verify(paymentRepository, never())
+                .save(any(PaymentEntity.class));
+
+        verify(paymentClient, never())
+                .create(any());
+    }
+
+
+    @Test
+    void createPixPayment_shouldThrowException_whenOrderBelongsToAnotherUser() throws Exception  {
+        UserEntity invaderUser = new UserEntity();
+        invaderUser.setId(UUID.randomUUID());
+
+        UserEntity realOwner = new UserEntity();
+        realOwner.setId(UUID.randomUUID());
+
+        Long orderId = 1L;
+
+        OrderEntity order =  new OrderEntity();
+        order.setId(orderId);
+        order.setUser(realOwner);
+
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.of(order));
+
+
+        IllegalStateException exception =
+                Assertions.assertThrows(
+                        IllegalStateException.class,
+                        () -> pixPaymentService.createPixPayment(invaderUser, orderId)
+                );
+
+        Assertions.assertEquals(
+                "Pedido não pertence a este usuário",
+                exception.getMessage()
+        );
+
+
+        verify(orderRepository, times(1))
+                .findById(orderId);
+
+        verify(paymentRepository, never())
+                .save(any());
+
+        verify(paymentClient, never())
+                .create(any());
+    }
+
+    @Test
+    void createPixPayment_shouldThrowException_whenOrderStatusIsDifferentFromPendingPayment() throws Exception {
+
+        UserEntity user = new  UserEntity();
+        user.setId(UUID.randomUUID());
+
+        Long orderId = 1L;
+
+        OrderEntity order = new OrderEntity();
+        order.setId(orderId);
+        order.setUser(user);
+        order.setStatus(OrderStatus.PAID);
+
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.of(order));
+
+        IllegalStateException exception =
+                Assertions.assertThrows(
+                        IllegalStateException.class,
+                        () -> pixPaymentService.createPixPayment(user, orderId));
+
+        Assertions.assertEquals(
+                "Pedido não está aguardando pagamento",
+                exception.getMessage()
+        );
+
+        verify(orderRepository, times(1))
+                .findById(orderId);
+
+        verify(paymentRepository, never())
+                .save(any());
+
+        verify(paymentClient, never())
+                .create(any());
+    }
+
+    @Test
+    void createPixPayment_shouldThrowException_whenOrderAlreadyHasPayment() throws Exception {
+
+        UserEntity user = new  UserEntity();
+        user.setId(UUID.randomUUID());
+
+        Long orderId = 1L;
+
+        PaymentEntity payment = new  PaymentEntity();
+        payment.setId(orderId);
+        payment.setUser(user);
+
+        OrderEntity order = new OrderEntity();
+        order.setId(orderId);
+        order.setUser(user);
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
+        order.setPayment(payment);
+
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.of(order));
+
+        IllegalStateException exception =
+                Assertions.assertThrows(
+                        IllegalStateException.class,
+                        () -> pixPaymentService.createPixPayment(user, orderId)
+                );
+
+        Assertions.assertEquals(
+                "Pedido já possui pagamento",
+                exception.getMessage()
+        );
+
+        verify(orderRepository, times(1))
+                .findById(orderId);
+
+        verify(paymentRepository, never())
+                .save(any(PaymentEntity.class));
+
+        verify(paymentClient, never())
+                .create(any());
+
+    }
+
+    @Test
+    void createPixPayment_shouldThrowRuntimeException_whenMercadoPagoConnectionFails() throws Exception {
+
+        UserEntity user = new UserEntity();
+        user.setId(UUID.randomUUID());
+        Long orderId = 1L;
+        OrderEntity order = new OrderEntity();
+        order.setId(orderId);
+        order.setUser(user);
+        order.setStatus(OrderStatus.PENDING_PAYMENT);
+        order.setTotalAmount(new BigDecimal("100.00"));
+
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.of(order));
+
+        when(paymentClient.create(any()))
+                .thenThrow(new MPException("Conexão com Mercado Pago falhou"));
+
+        RuntimeException exception = Assertions.assertThrows(
+                RuntimeException.class,
+                () -> pixPaymentService.createPixPayment(user, orderId)
+        );
+
+        Assertions.assertEquals("Erro interno de pagamento"
+                , exception.getMessage());
+
+        verify(paymentRepository, never()).save(any());
+    }
+
+
+    @Test
+    void getPaymentStatus_shouldReturnPayment_whenPaymentExists() throws MPException, MPApiException {
+
+        Long paymentId = 1L;
+
+        PaymentEntity localPayment = new PaymentEntity();
+        localPayment.setId(paymentId);
+        localPayment.setStatus(PaymentStatus.APPROVED);
+        localPayment.setQrCode("pix-copia-e-cola-falso");
+
+        when(paymentRepository.findById(paymentId))
+                .thenReturn(Optional.of(localPayment));
+
+        PixPaymentResponseDTO expectedResponse = new PixPaymentResponseDTO(
+                paymentId,
+                "ext-123",
+                new BigDecimal("100.00"),
+                "APPROVED",
+                null, // O base64 é null no getPaymentStatus
+                "pix-copia-e-cola-falso",
+                Instant.now().plus(30, ChronoUnit.MINUTES),
+                1L
+        );
+
+        when(paymentMapper.toDto(
+                localPayment,
+                null,
+                "pix-copia-e-cola-falso",
+                null
+        )).thenReturn(expectedResponse);
+
+        PixPaymentResponseDTO result = pixPaymentService.getPaymentStatus(paymentId);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(expectedResponse, result);
+
+        verify(paymentClient, never()).get(anyLong());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}// nomeDoMetodo_shouldOQueEleFaz_whenQualACondicao
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
