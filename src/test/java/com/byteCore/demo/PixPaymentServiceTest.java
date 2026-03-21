@@ -366,27 +366,7 @@ public class PixPaymentServiceTest {
 
         verify(paymentClient, never()).get(anyLong());
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}// nomeDoMetodo_shouldOQueEleFaz_whenQualACondicao
+}
 
 
 

@@ -46,6 +46,7 @@ public class AuthService {
         if (user.getAvailableBalance() == null) {
             user.setAvailableBalance(BigDecimal.ZERO);
         }
+
         if (user.getPendingBalance() == null) {
             user.setPendingBalance(BigDecimal.ZERO);
         }
