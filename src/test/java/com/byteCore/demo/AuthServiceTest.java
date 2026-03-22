@@ -2,8 +2,11 @@ package com.byteCore.demo;
 
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.UserMapper;
+import com.byteCore.demo.dto.request.LoginRequestDTO;
 import com.byteCore.demo.dto.request.RegisterRequestDTO;
+import com.byteCore.demo.dto.response.LoginResponseDTO;
 import com.byteCore.demo.dto.response.UserResponseDTO;
+import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.exceptions.DuplicateEmailException;
 import com.byteCore.demo.repository.UserRepository;
 import com.byteCore.demo.security.JwtUtils;
@@ -17,6 +20,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
@@ -155,6 +160,107 @@ public class AuthServiceTest {
 
         Assertions.assertEquals(BigDecimal.ZERO, user.getAvailableBalance());
 
+        verify(userRepository, times(1)).save(user);
+
+    }
+
+    @Test
+    void shouldInitializePendingBalanceWithZero_whenPendingBalanceIsNull() {
+
+        RegisterRequestDTO dto = new RegisterRequestDTO(
+                "user", "email@gmail.com",  "123456", "123456"
+        );
+
+        UserEntity user = new UserEntity();
+        user.setAvailableBalance(new BigDecimal("200.00"));
+        user.setPendingBalance(null);
+
+        Assertions.assertNull(user.getPendingBalance());
+
+        when(userRepository.findByEmail(dto.email()))
+                .thenReturn(Optional.empty());
+
+        when(userMapper.toEntity(dto))
+                .thenReturn(user);
+
+        when(passwordEncoder.encode(dto.password()))
+                .thenReturn("encoded");
+
+        authService.register(dto);
+
+        Assertions.assertEquals(BigDecimal.ZERO, user.getPendingBalance());
+
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void login_shouldReturnToken_whenCredentialsAreValid() {
+
+        LoginRequestDTO request = new   LoginRequestDTO(
+                "email@gmail.com", "123456"
+        );
+
+        UserEntity user = new UserEntity();
+        user.setRole(Role.USER);
+        user.setEmail(request.email());
+
+        when(userRepository.findByEmail(request.email()))
+                .thenReturn(Optional.of(user));
+
+        when(jwtUtils.generateToken(user.getEmail(), user.getRole().name()))
+                .thenReturn("token-jwt");
+
+        LoginResponseDTO result = authService.login(request);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("token-jwt", result.token());
+
+        verify(authenticationManager, times(1))
+                .authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        verify(userRepository, times(1))
+                .findByEmail(request.email());
+
+        verify(jwtUtils, times(1))
+                .generateToken(user.getEmail(), user.getRole().name());
+    }
+
+    @Test
+    void login_shouldThrowException_whenCredentialsAreInvalid() {
+        LoginRequestDTO request = new LoginRequestDTO("email@gmail.com", "senha-errada");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException("bad credentials"));
+
+        Assertions.assertThrows(
+                BadCredentialsException.class,
+                () -> authService.login(request)
+        );
+
+        verify(authenticationManager, times(1)).authenticate(any());
+        verify(userRepository, never()).findByEmail(anyString());
+        verify(jwtUtils, never()).generateToken(anyString(), anyString());
+    }
+
+
+    @Test
+    void login_shouldThrowException_whenUserNotFound() {
+
+        LoginRequestDTO request = new LoginRequestDTO("email@gmail.com", "123456");
+
+        when(userRepository.findByEmail(request.email()))
+                .thenReturn(Optional.empty());
+
+        RuntimeException exception = Assertions.assertThrows(
+                RuntimeException.class,
+                () -> authService.login(request)
+        );
+
+        Assertions.assertEquals("Usuário não encontrado", exception.getMessage());
+
+        verify(authenticationManager, times(1)).authenticate(any());
+        verify(userRepository, times(1)).findByEmail(request.email());
+        verify(jwtUtils, never()).generateToken(anyString(), anyString());
     }
 
 
@@ -164,10 +270,6 @@ public class AuthServiceTest {
 
 
 
-
-
-
-// `nomeDoMetodo_shouldOQueEleFaz_whenQualACondicao`
 
 
 
