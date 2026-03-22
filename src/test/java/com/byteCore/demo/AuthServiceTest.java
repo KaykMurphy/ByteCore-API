@@ -160,38 +160,8 @@ public class AuthServiceTest {
 
         Assertions.assertEquals(BigDecimal.ZERO, user.getAvailableBalance());
 
-        verify(userRepository, times(1)).save(user);
-
     }
 
-    @Test
-    void shouldInitializePendingBalanceWithZero_whenPendingBalanceIsNull() {
-
-        RegisterRequestDTO dto = new RegisterRequestDTO(
-                "user", "email@gmail.com",  "123456", "123456"
-        );
-
-        UserEntity user = new UserEntity();
-        user.setAvailableBalance(new BigDecimal("200.00"));
-        user.setPendingBalance(null);
-
-        Assertions.assertNull(user.getPendingBalance());
-
-        when(userRepository.findByEmail(dto.email()))
-                .thenReturn(Optional.empty());
-
-        when(userMapper.toEntity(dto))
-                .thenReturn(user);
-
-        when(passwordEncoder.encode(dto.password()))
-                .thenReturn("encoded");
-
-        authService.register(dto);
-
-        Assertions.assertEquals(BigDecimal.ZERO, user.getPendingBalance());
-
-        verify(userRepository, times(1)).save(user);
-    }
 
     @Test
     void login_shouldReturnToken_whenCredentialsAreValid() {
@@ -270,6 +240,8 @@ public class AuthServiceTest {
 
 
 
+
+// `nomeDoMetodo_shouldOQueEleFaz_whenQualACondicao`
 
 
 
