@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import util.TestDataFactory;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -340,6 +341,46 @@ public class ReviewServiceTest {
         );
 
         verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    void getReviewsByUser_shouldReturnReviewList_whenUserHasReviews() {
+
+        UUID userId = UUID.randomUUID();
+
+        UserEntity reviewer = TestDataFactory.validUser();
+        reviewer.setId(UUID.randomUUID());
+
+        UserEntity seller = TestDataFactory.validUser();
+        seller.setId(userId);
+
+        ReviewEntity review = TestDataFactory.validReviewEntity(
+                UUID.randomUUID(), reviewer, seller);
+
+        List<ReviewEntity> entityList = List.of(review);
+
+        when(reviewRepository.findByReviewedUserId(userId))
+                .thenReturn(entityList);
+
+        ReviewResponseDTO responseDTO = TestDataFactory.validReviewResponseDTO(
+                1L, reviewer, seller);
+
+        List<ReviewResponseDTO> expectedResponseList = List.of(responseDTO);
+
+        when(reviewMapper.toResponseDTOList(entityList))
+                .thenReturn(expectedResponseList);
+
+        List<ReviewResponseDTO> result = reviewService.getReviewsByUser(userId);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(expectedResponseList, result);
+
+        verify(reviewRepository, times(1))
+                .findByReviewedUserId(userId);
+
+        verify(reviewMapper, times(1))
+                .toResponseDTOList(entityList);
     }
 
 
