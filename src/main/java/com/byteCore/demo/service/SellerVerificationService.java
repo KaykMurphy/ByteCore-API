@@ -25,9 +25,11 @@ public class SellerVerificationService {
     @Transactional
     public SellerVerificationEntity submitVerification(UserEntity user, SellerVerificationRequestDTO dto) {
 
-        log.info("Usuário {} está submetendo uma nova verificação de vendedor", user.getEmail());
+        log.info("Usuário {} está submetendo uma nova verificação de vendedor",
+                user.getEmail());
 
-        boolean hasPending = sellerVerificationRepository.existsByUserIdAndStatus(user.getId(), VerificationStatus.PENDING);
+        boolean hasPending = sellerVerificationRepository.existsByUserIdAndStatus(
+                user.getId(), VerificationStatus.PENDING);
 
         if (hasPending) {
             log.warn("Usuário {} tentou submeter verificação, mas já possui uma PENDING.",

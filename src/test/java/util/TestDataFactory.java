@@ -1,11 +1,14 @@
 package util;
 
+import com.byteCore.demo.SellerVerificationServiceTest;
 import com.byteCore.demo.domain.*;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
 import com.byteCore.demo.dto.request.ProductUpdateDTO;
 import com.byteCore.demo.dto.request.ReviewRequestDTO;
+import com.byteCore.demo.dto.request.SellerVerificationRequestDTO;
 import com.byteCore.demo.dto.response.ReviewResponseDTO;
 import com.byteCore.demo.enums.ProductType;
+import com.byteCore.demo.enums.VerificationStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -103,5 +106,35 @@ public class TestDataFactory {
         review.setComment("comment antigo");
 
         return review;
+    }
+
+    public static SellerVerificationRequestDTO validSellerVerificationRequestDTO() {
+
+        return new SellerVerificationRequestDTO(
+                "Gutenberg Full",
+                "111.111.111-11",
+                "(99) 99999999",
+                "444-444",
+                "Endereço",
+                "Perto de casa"
+        );
+    }
+
+    public static SellerVerificationEntity validVerificationEntity(UserEntity user) {
+        SellerVerificationEntity entity = new SellerVerificationEntity();
+        entity.setId(UUID.randomUUID());
+        entity.setUser(user);
+        entity.setFullName("Gutenberg Full");
+        entity.setCpf("111.111.111-11");
+        entity.setPhoneNumber("(99) 99999999");
+        entity.setCep("444-444");
+        entity.setAddress("Endereço");
+        entity.setAdditionalInfo("Perto de casa");
+
+        entity.setStatus(VerificationStatus.PENDING);
+        entity.setVersion(1);
+        entity.setSubmittedAt(Instant.now());
+
+        return entity;
     }
 }
