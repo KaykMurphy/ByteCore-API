@@ -7,7 +7,6 @@ import com.byteCore.demo.dto.request.SellerVerificationRequestDTO;
 import com.byteCore.demo.enums.VerificationStatus;
 import com.byteCore.demo.repository.SellerVerificationRepository;
 import com.byteCore.demo.service.SellerVerificationService;
-import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

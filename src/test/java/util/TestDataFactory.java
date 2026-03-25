@@ -60,6 +60,16 @@ public class TestDataFactory {
         return user;
     }
 
+    public static UserEntity validAdmin() {
+        UserEntity admin = new UserEntity();
+        admin.setId(UUID.randomUUID());
+        admin.setName("Admin Genérico");
+        admin.setEmail("admin@teste.com");
+        return admin;
+    }
+
+
+
     public static ReviewRequestDTO validReviewRequestDTO() {
         return new ReviewRequestDTO(1L, 5, "Bom - Teste");
     }

@@ -25,7 +25,8 @@ public class AdminVerificationService {
     private final BlacklistService blacklistService;
 
     public List<SellerVerificationEntity> listPendingVerifications() {
-        return sellerVerificationRepository.findByStatusOrderBySubmittedAtAsc(VerificationStatus.PENDING);
+        return sellerVerificationRepository.findByStatusOrderBySubmittedAtAsc(
+                VerificationStatus.PENDING);
     }
 
     public SellerVerificationEntity approveVerification(UUID verificationId, UserEntity admin) {
