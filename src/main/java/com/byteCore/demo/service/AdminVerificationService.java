@@ -51,9 +51,11 @@ public class AdminVerificationService {
         return verification;
     }
 
-    public SellerVerificationEntity rejectVerification(UUID verificationId, UserEntity admin, String reason) {
+    public SellerVerificationEntity rejectVerification(
+            UUID verificationId, UserEntity admin, String reason) {
 
-        SellerVerificationEntity verification = sellerVerificationRepository.findById(verificationId)
+        SellerVerificationEntity verification
+                = sellerVerificationRepository.findById(verificationId)
                 .orElseThrow(() -> new EntityNotFoundException("Verificação não encontrada"));
 
         verification.reject(admin, reason);
@@ -67,7 +69,8 @@ public class AdminVerificationService {
 
     public void banVerificationDocuments(UUID verificationId, String reason, UserEntity admin) {
 
-        SellerVerificationEntity verification = sellerVerificationRepository.findById(verificationId)
+        SellerVerificationEntity verification 
+                = sellerVerificationRepository.findById(verificationId)
                 .orElseThrow(() -> new EntityNotFoundException("Verificação não encontrada"));
 
         UserEntity user = verification.getUser();
