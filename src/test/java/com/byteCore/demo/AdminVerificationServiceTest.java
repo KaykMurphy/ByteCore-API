@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import util.TestDataFactory;
 
+import javax.swing.text.Document;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -315,6 +316,73 @@ public class AdminVerificationServiceTest {
         verify(sellerVerificationRepository, times(1))
                 .findById(verificationId);
     }
+
+    @Test
+    void banVerificationDocuments_shouldContinueAndDemoteUser_whenDocumentIsAlreadyBanned() {
+
+        UUID verificationId =  UUID.randomUUID();
+        UserEntity admin = TestDataFactory.validAdmin();
+        UserEntity user = TestDataFactory.validUser();
+
+        String reason = "Documento negado";
+
+        SellerVerificationEntity verification = TestDataFactory.validVerificationEntity(
+                user
+        );
+
+        DocumentEntity document = TestDataFactory.validDocumentEntity();
+        verification.addDocument(document);
+
+        when(sellerVerificationRepository.findById(verificationId))
+                .thenReturn(Optional.of(verification));
+
+
+        doThrow(new IllegalStateException(reason))
+                .when(blacklistService).banDocument(
+                        any(), any(), any(), any(), any()
+                );
+
+        Assertions.assertDoesNotThrow(() ->
+                adminVerificationService.banVerificationDocuments(verificationId, reason, admin)
+        );
+
+        ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+
+        UserEntity capturedUser = userCaptor.getValue();
+        Assertions.assertEquals(user, capturedUser);
+        Assertions.assertEquals(Role.USER, capturedUser.getRole());
+
+        verify(sellerVerificationRepository, never()).save(any(SellerVerificationEntity.class));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
 
 
 

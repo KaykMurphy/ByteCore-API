@@ -7,11 +7,11 @@ import com.byteCore.demo.dto.request.ProductUpdateDTO;
 import com.byteCore.demo.dto.request.ReviewRequestDTO;
 import com.byteCore.demo.dto.request.SellerVerificationRequestDTO;
 import com.byteCore.demo.dto.response.ReviewResponseDTO;
-import com.byteCore.demo.enums.ProductType;
-import com.byteCore.demo.enums.VerificationStatus;
+import com.byteCore.demo.enums.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -146,5 +146,41 @@ public class TestDataFactory {
         entity.setSubmittedAt(Instant.now());
 
         return entity;
+    }
+
+    public static DocumentEntity validDocumentEntity() {
+
+        DocumentEntity document = new DocumentEntity();
+        document.setDocumentType(DocumentType.RG);
+        document.setStoredPath("caminho/do/documento.pdf");
+        document.setAdminNotes("motivo ADMIN");
+        document.setId(UUID.randomUUID());
+
+
+        return document;
+    }
+
+    public static OrderEntity validOrderEntity() {
+
+        OrderEntity order = new OrderEntity();
+        order.setStatus(OrderStatus.PAID);
+        order.setId(1L);
+        order.setNotes("motivo NOTES");
+
+        order.setItems(new ArrayList<>());
+
+        return order;
+
+    }
+
+    public static ProductEntity validProductEntity() {
+        ProductEntity product = new ProductEntity();
+        product.setId(10L);
+        product.setTitle("title");
+        product.setDescription("description");
+        product.setActive(true);
+        product.setStatus(ProductStatus.APPROVED);
+
+        return product;
     }
 }
