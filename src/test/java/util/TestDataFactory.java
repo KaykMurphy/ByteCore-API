@@ -11,6 +11,7 @@ import com.byteCore.demo.enums.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -182,5 +183,23 @@ public class TestDataFactory {
         product.setStatus(ProductStatus.APPROVED);
 
         return product;
+    }
+
+    public static PaymentEntity validPaymentEntity() {
+        PaymentEntity payment = new PaymentEntity();
+        payment.setId(1L);
+        payment.setExternalId("ext_123456789");
+        payment.setAmount(new BigDecimal("100.00"));
+        payment.setSellerAmount(new BigDecimal("90.00"));
+        payment.setStatus(PaymentStatus.APPROVED);
+        payment.setMethod(PaymentMethod.PIX);
+        payment.setQrCode("00020126580014br.gov.bcb.pix...");
+        payment.setCreatedAt(Instant.now().minus(2, ChronoUnit.DAYS));
+        payment.setPaidAt(Instant.now().minus(2, ChronoUnit.DAYS));
+
+        payment.setMoneyReleased(false);
+        payment.setMoneyReleaseDate(Instant.now().minus(1, ChronoUnit.HOURS));
+
+        return payment;
     }
 }
