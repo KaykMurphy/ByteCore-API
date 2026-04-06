@@ -1,77 +1,107 @@
 # ByteCore API
 
-> **⚠️ PROJETO EM DESENVOLVIMENTO ATIVO**
->
-> Este projeto está em construção. Algumas funcionalidades podem estar incompletas, sujeitas a mudanças ou ainda não totalmente testadas. A cobertura de testes está sendo expandida progressivamente.
+API REST para marketplace de produtos digitais com entrega automatizada, fluxo de verificação de vendedores e integração com PIX via Mercado Pago.
 
-API REST para marketplace de produtos digitais com entrega automática, sistema de verificação de vendedores e integração com Mercado Pago (PIX).
+> Reescrita da [bytemarket v1](https://github.com/KaykMurphy/bytemarket). Mesmo domínio, arquitetura melhor.
 
-> Segunda versão da [bytemarket](https://github.com/KaykMurphy/bytemarket) — reescrita do zero com arquitetura mais sólida, boas práticas e maior facilidade de manutenção.
+&nbsp;
 
----
+## Tecnologias
 
-## Stack
+`Java 17` `Spring Boot 3.4` `Spring Security` `JWT` `Spring Data JPA` `PostgreSQL` `MapStruct` `Mercado Pago SDK` `JavaMailSender` `JUnit 5` `Mockito`
 
-- **Java 17** + **Spring Boot 3.4**
-- **Spring Security** + **JWT** (jjwt 0.12)
-- **Spring Data JPA** + **PostgreSQL** (H2 para testes)
-- **MapStruct** + **Lombok**
-- **Mercado Pago SDK**
-- **JavaMailSender** + **Thymeleaf** (e-mails HTML)
-- **SpringDoc OpenAPI** (Swagger UI)
+H2 em memória para desenvolvimento local. PostgreSQL em produção.
 
----
+&nbsp;
 
-## Funcionalidades
+## Como funciona
 
-| Módulo | Descrição | Status |
-|---|---|---|
-| Auth | Registro, login com JWT, endpoint `/me` | ✅ Implementado |
-| Produtos | CRUD público (paginado + busca), aprovação por admin | ✅ Implementado |
-| Pedidos | Criação com validação de estoque e status do vendedor | ✅ Implementado |
-| Pagamentos | PIX via Mercado Pago, webhook com validação de assinatura HMAC-SHA256 | ✅ Implementado |
-| Entrega digital | Entrega automática de keys/contas por e-mail após confirmação do pagamento | ✅ Implementado |
-| Verificação de vendedor | Fluxo de submissão → análise → aprovação/rejeição/ban | ✅ Implementado |
-| Saques | Solicitação via PIX com limite diário de R$ 500 | ✅ Implementado |
-| Reviews | Avaliação de vendedores pós-entrega (máx. 2 edições) | ✅ Implementado |
-| Blacklist | Documentos banidos por hash SHA-256 | ✅ Implementado |
-| Jobs | Liberação automática de saldo (cron diário às 03h) | ✅ Implementado |
+O fluxo principal é direto: o comprador cria um pedido, gera um pagamento PIX e, após a confirmação do webhook do Mercado Pago, o sistema entrega automaticamente o conteúdo do produto (keys, contas) por e-mail.
 
----
+O saldo do vendedor fica retido em estado pendente por 7 a 14 dias dependendo da avaliação dele, antes de um job agendado liberá-lo. Se a entrega automática falhar no meio da transação, um job de retry reprocessa a cada 30 minutos.
 
-## Segurança
+Vendedores passam por um fluxo de verificação de documentos antes de poderem listar produtos. Documentos fraudulentos são identificados por SHA-256 e bloqueados permanentemente — reenviar o mesmo documento com outra conta não vai funcionar.
 
-- Autenticação stateless com JWT
-- Roles: `USER`, `PENDING_SELLER`, `VERIFIED_SELLER`, `ADMIN`
-- Validação de assinatura HMAC-SHA256 nos webhooks do Mercado Pago
-- Controle de concorrência com `@Version` (Optimistic Lock) no estoque
-- Hash SHA-256 em documentos para blacklist
+&nbsp;
 
----
+## Rodando localmente
 
-## Endpoints principais
+```bash
+git clone https://github.com/KaykMurphy/bytemarket-v2
+cd bytemarket-v2
+./mvnw spring-boot:run
+```
+
+Swagger UI → `http://localhost:8080/swagger-ui.html`  
+Console H2 → `http://localhost:8080/h2-console`
+
+&nbsp;
+
+**Variáveis de ambiente necessárias:**
+
+```properties
+# Auth
+JWT_SECRET=          # Base64-encoded, mínimo 256 bits
+JWT_EXPIRATION=
+
+# Mercado Pago
+MERCADOPAGO_ACCESS_TOKEN=
+MERCADOPAGO_WEBHOOK_SECRET=
+
+# E-mail
+EMAIL_USER=
+EMAIL_PASSWORD=
+
+# Admin seed (criado automaticamente ao subir)
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+
+# App
+APP_BASE_URL=
+```
+
+&nbsp;
+
+## Estrutura do projeto
+
+```
+config/         Spring Security, CORS, OpenAPI, admin seeder
+controller/     Camada HTTP — validação, extração de auth, mapeamento de resposta
+service/        Regras de negócio. Tudo vive aqui.
+domain/         Entidades JPA com métodos de negócio (não são modelos anêmicos)
+dto/            Records de request/response + mappers MapStruct
+repository/     Interfaces Spring Data JPA
+security/       Filtro JWT, CustomUserDetails
+exceptions/     Handler global de exceções (@ControllerAdvice)
+enums/          Roles, status, tipos de produto e pagamento
+validation/     Validators customizados
+```
+
+Vale notar: as entidades carregam seu próprio comportamento — `order.markAsPaid()`, `product.decrementStock()`, `verification.approve(admin)`. As regras de negócio não ficam espalhadas pelos métodos de serviço.
+
+&nbsp;
+
+## Endpoints
 
 ```
 POST   /auth/register
 POST   /auth/login
 GET    /auth/me
 
-GET    /api/products          (público, paginado)
-GET    /api/products/{id}     (público)
-GET    /api/products/search   (público)
-
+GET    /api/products              catálogo paginado
+GET    /api/products/{id}
+GET    /api/products/search
 POST   /api/orders
 POST   /api/payments/pix/{orderId}
-
-POST   /seller/verifications
-GET    /seller/verifications/me
-
 POST   /api/reviews
 PUT    /api/reviews/{id}
-
+GET    /api/reviews/user/{userId}
 POST   /api/withdrawals
 GET    /api/withdrawals/me
 GET    /api/withdrawals/balance
+
+POST   /seller/verifications
+GET    /seller/verifications/me
 
 POST   /admin/products
 PUT    /admin/products/{id}
@@ -84,63 +114,7 @@ POST   /admin/verifications/{id}/ban
 POST   /api/webhooks/mercadopago
 ```
 
-Documentação interativa disponível em `/swagger-ui.html`.
-
----
-
-## Configuração
-
-As variáveis abaixo devem estar definidas no `application.properties` ou como variáveis de ambiente:
-
-```properties
-# Banco de dados
-spring.datasource.url=
-spring.datasource.username=
-spring.datasource.password=
-
-# JWT
-jwt.secret=           # Base64 encoded, mínimo 256 bits
-jwt.expirationMs=
-
-# Mercado Pago
-mercadopago.access_token=
-mercadopago.webhook.secret=
-
-# E-mail
-spring.mail.host=
-spring.mail.port=
-spring.mail.username=
-spring.mail.password=
-bytemarket.email.from=
-
-# Admin seed
-admin_email=
-admin_password=
-
-# App
-app.base-url=
-app.cors.allowed-origins=
-```
-
----
-
-## Rodando localmente
-
-```bash
-# Clone
-git clone https://github.com/KaykMurphy/bytemarket-v2
-cd bytemarket-v2
-
-# Build
-./mvnw clean package -DskipTests
-
-# Run
-./mvnw spring-boot:run
-```
-
-Por padrão usa H2 em memória. Para PostgreSQL, configure o `application.properties` adequadamente.
-
----
+&nbsp;
 
 ## Testes
 
@@ -148,50 +122,37 @@ Por padrão usa H2 em memória. Para PostgreSQL, configure o `application.proper
 ./mvnw test
 ```
 
-> **🚧 Em expansão** — A cobertura de testes está sendo incrementada gradualmente.
-> Atualmente cobertos com **JUnit 5** + **Mockito**:
+Testes unitários com JUnit 5 + Mockito. Testes de integração ainda não escritos.
 
-| Classe | Testes | Cobertura |
-|---|---|---|
-| `AdminProductService` | CRUD completo + exceções | ✅ |
-| `OrderService` | Criação de pedidos + validações | ✅ |
-| Demais serviços | — | 🔄 Em andamento |
+| Service | Cobertura |
+|---|---|
+| `AdminProductService` | CRUD + cenários de não encontrado |
+| `AdminVerificationService` | Aprovação, rejeição, ban, documento já banido |
+| `AuthService` | Registro, login, e-mail duplicado, saldo nulo |
+| `OrderService` | Criação de pedido + todas as validações de negócio |
+| `PixPaymentService` | Criação do pagamento, erros do gateway, consulta de status |
+| `ReviewService` | Criação, edição, ownership, limite de edições |
+| `ScheduledPaymentReleaseJob` | Liberação em lote, isolamento de falha por item |
+| `SellerVerificationService` | Submissão, guard de verificação pendente duplicada |
+| `WithdrawalService` | Criação de saque, saldo insuficiente, limite diário |
+| `DigitalProductDeliveryService` | Entrega automática, log de falha por estoque insuficiente |
 
----
+&nbsp;
 
-## Arquitetura
+## Status
 
-```
-controller/     → entrada HTTP, validação de request
-service/        → regras de negócio
-domain/         → entidades JPA
-dto/            → request/response + mappers (MapStruct)
-repository/     → Spring Data JPA
-security/       → JWT filter, UserDetails
-config/         → Security, CORS, OpenAPI, seeds
-exceptions/     → handlers globais
-enums/          → roles, status, tipos
-validation/     → validators customizados
-```
+- [x] Core da API
+- [x] Autenticação JWT
+- [x] Pagamentos PIX + webhook
+- [x] Entrega digital automatizada + job de retry
+- [x] Fluxo de verificação de vendedor
+- [x] Job de liberação de saldo
+- [x] Testes unitários — em andamento
+- [ ] Testes de integração
+- [ ] Validação de assinatura do webhook reativada para produção
 
----
-
-## Status do Projeto
-
-```
-🟢 Core da API         → Funcional
-🟢 Autenticação JWT    → Funcional
-🟢 Pagamentos PIX      → Funcional
-🟢 Entrega digital     → Funcional
-🟡 Testes unitários    → Em expansão
-🟡 Validação webhook   → Temporariamente desabilitada (dev)
-🔴 Testes integração   → Não iniciados
-```
+&nbsp;
 
 ---
 
----
-
-Built with ☕, discipline, and attention to detail.
-
-Developed by **[Kayk Edmar](https://github.com/KaykMurphy)** — Backend Developer focused on scalable systems and clean architecture.
+Desenvolvido por [Kayk Edmar](https://github.com/KaykMurphy)
