@@ -41,12 +41,14 @@ public class ScheduledPaymentReleaseJobTest {
 
     @Test
     void releasePayments_whenDataIsValid_shouldUpdateBalancesAndStatus() {
+
         UserEntity seller = new UserEntity();
         seller.setId(UUID.randomUUID());
         seller.setPendingBalance(new BigDecimal("100.00"));
         seller.setAvailableBalance(new BigDecimal("0.00"));
 
         OrderEntity mockOrder = new OrderEntity();
+
         ProductEntity mockProduct = new ProductEntity();
         mockProduct.setPrice(new BigDecimal("100.00"));
         mockProduct.setSeller(seller);
@@ -55,7 +57,7 @@ public class ScheduledPaymentReleaseJobTest {
         mockItem.setPrice(new BigDecimal("100.00"));
         mockItem.setQuantity(1);
         mockItem.setProduct(mockProduct);
-        mockOrder.addItem(mockItem); // Ag
+        mockOrder.addItem(mockItem);
 
         PaymentEntity p1 = TestDataFactory.validPaymentEntity();
         p1.setId(1L);
@@ -67,8 +69,10 @@ public class ScheduledPaymentReleaseJobTest {
         p2.setSellerAmount(new BigDecimal("60.00"));
         p2.setOrder(mockOrder);
 
+        List<PaymentEntity> pagamentosPendentes = Arrays.asList(p1, p2);
+
         when(paymentRepository.findByStatusAndMoneyReleasedFalseAndMoneyReleaseDateBefore(any(), any()))
-                .thenReturn(Arrays.asList(p1, p2));
+                .thenReturn(pagamentosPendentes);
 
         scheduledPaymentReleaseJob.releasePayments();
 
@@ -83,5 +87,54 @@ public class ScheduledPaymentReleaseJobTest {
         Assertions.assertEquals(new BigDecimal("100.00"), finalSellerState.getAvailableBalance());
         Assertions.assertEquals(new BigDecimal("0.00"), finalSellerState.getPendingBalance());
     }
+
+    @Test
+    void releasePayments_whenOnePaymentFailsToSave_shouldProcessRemainingPayments(){
+
+        UserEntity seller = new UserEntity();
+        seller.setId(UUID.randomUUID());
+        seller.setPendingBalance(new BigDecimal("100.00"));
+        seller.setAvailableBalance(new BigDecimal("0.00"));
+
+        OrderEntity mockOrder = new OrderEntity();
+
+        ProductEntity mockProduct = new ProductEntity();
+        mockProduct.setPrice(new BigDecimal("100.00"));
+        mockProduct.setSeller(seller);
+
+        OrderItemEntity mockItem = new OrderItemEntity();
+        mockItem.setPrice(new BigDecimal("100.00"));
+        mockItem.setQuantity(1);
+        mockItem.setProduct(mockProduct);
+        mockOrder.addItem(mockItem);
+
+        PaymentEntity p1 = TestDataFactory.validPaymentEntity();
+        p1.setId(1L);
+        p1.setSellerAmount(new BigDecimal("40.00"));
+        p1.setOrder(mockOrder);
+
+        PaymentEntity p2 = TestDataFactory.validPaymentEntity();
+        p2.setId(2L);
+        p2.setSellerAmount(new BigDecimal("60.00"));
+        p2.setOrder(mockOrder);
+
+        List<PaymentEntity> pagamentosPendentes = Arrays.asList(p1, p2);
+
+        when(paymentRepository.findByStatusAndMoneyReleasedFalseAndMoneyReleaseDateBefore(any(), any()))
+                .thenReturn(pagamentosPendentes);
+
+        doThrow(new RuntimeException("Simulando queda do banco de dados no P1!"))
+                .when(paymentRepository).save(p1);
+
+        Assertions.assertDoesNotThrow(() -> {
+            scheduledPaymentReleaseJob.releasePayments();
+        });
+
+        verify(paymentRepository, times(2)).save(any(PaymentEntity.class));
+        verify(userRepository, times(2)).save(any(UserEntity.class));
+    }
+
+
+
 }
 

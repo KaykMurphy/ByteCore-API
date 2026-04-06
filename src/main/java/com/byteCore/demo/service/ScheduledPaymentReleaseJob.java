@@ -64,14 +64,18 @@ public class ScheduledPaymentReleaseJob {
                 continue;
             }
 
-            seller.movePendingToAvailable(payment.getSellerAmount());
+            try {
+                seller.movePendingToAvailable(payment.getSellerAmount());
+                payment.markAsReleased();
 
-            payment.markAsReleased();
+                userRepository.save(seller);
+                paymentRepository.save(payment);
 
-            userRepository.save(seller);
-            paymentRepository.save(payment);
+                log.info("Pagamento {} liberado para vendedor {}", payment.getId(), seller.getName());
 
-            log.info("Pagamento {} liberado para vendedor {}", payment.getId(), seller.getName());
+            } catch (Exception e) {
+                log.error("Erro catastrófico ao liberar pagamento ID {}. Pulando para o próximo...", payment.getId(), e);
+            }
         }
 
         log.info("Job concluído.");
