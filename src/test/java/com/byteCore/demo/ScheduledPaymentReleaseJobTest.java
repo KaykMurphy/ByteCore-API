@@ -8,8 +8,8 @@ import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.repository.PaymentRepository;
 import com.byteCore.demo.repository.UserRepository;
 import com.byteCore.demo.service.ScheduledPaymentReleaseJob;
-import org.junit.jupiter.api.Assertions; // Import correto!
-import org.junit.jupiter.api.Test; // Import correto do JUnit 5!
+import org.junit.jupiter.api.Assertions; 
+import org.junit.jupiter.api.Test; 
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
