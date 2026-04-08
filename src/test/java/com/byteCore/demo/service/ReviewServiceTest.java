@@ -1,6 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.ReviewService;
 import com.byteCore.demo.domain.*;
 import com.byteCore.demo.dto.mapper.ReviewMapper;
 import com.byteCore.demo.dto.request.ReviewRequestDTO;

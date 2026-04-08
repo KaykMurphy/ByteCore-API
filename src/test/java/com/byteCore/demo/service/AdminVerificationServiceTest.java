@@ -1,7 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.AdminVerificationService;
-import com.byteCore.demo.BlacklistService;
 import com.byteCore.demo.domain.DocumentEntity;
 import com.byteCore.demo.domain.SellerVerificationEntity;
 import com.byteCore.demo.domain.UserEntity;

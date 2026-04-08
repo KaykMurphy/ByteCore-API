@@ -1,6 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.WithdrawalService;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.domain.WithdrawalRequestEntity;
 import com.byteCore.demo.enums.WithdrawalStatus;

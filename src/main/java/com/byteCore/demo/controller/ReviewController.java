@@ -3,7 +3,7 @@ package com.byteCore.demo.controller;
 import com.byteCore.demo.dto.request.ReviewRequestDTO;
 import com.byteCore.demo.dto.response.ReviewResponseDTO;
 import com.byteCore.demo.security.CustomUserDetails;
-import com.byteCore.demo.ReviewService;
+import com.byteCore.demo.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

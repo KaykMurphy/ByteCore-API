@@ -5,7 +5,7 @@ import com.byteCore.demo.dto.mapper.OrderMapper;
 import com.byteCore.demo.dto.request.OrderCreateDTO;
 import com.byteCore.demo.dto.response.OrderResponseDTO;
 import com.byteCore.demo.security.CustomUserDetails;
-import com.byteCore.demo.OrderService;
+import com.byteCore.demo.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -1,4 +1,4 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.domain.WithdrawalRequestEntity;

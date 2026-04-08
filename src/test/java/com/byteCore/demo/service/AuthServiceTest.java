@@ -1,6 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.AuthService;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.UserMapper;
 import com.byteCore.demo.dto.request.LoginRequestDTO;

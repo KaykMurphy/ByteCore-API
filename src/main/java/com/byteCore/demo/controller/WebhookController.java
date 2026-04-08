@@ -1,7 +1,7 @@
 package com.byteCore.demo.controller;
 
 import com.byteCore.demo.dto.response.MercadoPagoWebhookDTO;
-import com.byteCore.demo.WebhookService;
+import com.byteCore.demo.service.WebhookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

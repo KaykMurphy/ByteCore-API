@@ -1,6 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.SellerVerificationService;
 import com.byteCore.demo.domain.SellerVerificationEntity;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.SellerVerificationMapper;

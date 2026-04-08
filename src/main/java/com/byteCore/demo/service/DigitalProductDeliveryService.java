@@ -1,4 +1,4 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
 import com.byteCore.demo.domain.*;
 import com.byteCore.demo.enums.DeliveryStatus;

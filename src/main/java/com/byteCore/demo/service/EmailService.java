@@ -1,6 +1,5 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
-import com.byteCore.demo.domain.OrderEntity;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;

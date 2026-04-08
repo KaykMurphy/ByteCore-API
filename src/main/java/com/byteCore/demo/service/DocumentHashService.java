@@ -1,4 +1,4 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
 import org.springframework.stereotype.Service;
 

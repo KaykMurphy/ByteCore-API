@@ -3,7 +3,7 @@ package com.byteCore.demo.controller;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
 import com.byteCore.demo.dto.request.ProductUpdateDTO;
 import com.byteCore.demo.dto.response.ProductResponseDTO;
-import com.byteCore.demo.AdminProductService;
+import com.byteCore.demo.service.AdminProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.DigitalProductDeliveryService;
-import com.byteCore.demo.EmailService;
-import com.byteCore.demo.OrderService;
 import com.byteCore.demo.domain.*; // Importei com * pra ficar mais limpo
 import com.byteCore.demo.enums.DeliveryStatus;
 import com.byteCore.demo.enums.DeliveryType;

@@ -7,7 +7,7 @@ import com.byteCore.demo.dto.request.WithdrawalRequestDTO;
 import com.byteCore.demo.dto.response.WithdrawalResponseDTO;
 import com.byteCore.demo.repository.WithdrawalRequestRepository;
 import com.byteCore.demo.security.CustomUserDetails;
-import com.byteCore.demo.WithdrawalService;
+import com.byteCore.demo.service.WithdrawalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

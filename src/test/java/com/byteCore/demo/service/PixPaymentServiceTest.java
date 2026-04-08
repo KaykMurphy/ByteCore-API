@@ -1,6 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.PixPaymentService;
 import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.domain.PaymentEntity;
 import com.byteCore.demo.domain.UserEntity;

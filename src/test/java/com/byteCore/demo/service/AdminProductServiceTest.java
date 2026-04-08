@@ -1,6 +1,5 @@
 package com.byteCore.demo.service;
 
-import com.byteCore.demo.AdminProductService;
 import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.dto.mapper.ProductMapper;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
