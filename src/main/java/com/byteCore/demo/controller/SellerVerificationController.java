@@ -8,7 +8,7 @@ import com.byteCore.demo.dto.response.SellerVerificationResponseDTO;
 import com.byteCore.demo.repository.SellerVerificationRepository;
 import com.byteCore.demo.repository.UserRepository;
 import com.byteCore.demo.security.CustomUserDetails;
-import com.byteCore.demo.service.SellerVerificationService;
+import com.byteCore.demo.SellerVerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

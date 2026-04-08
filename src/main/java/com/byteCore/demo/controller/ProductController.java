@@ -1,7 +1,7 @@
 package com.byteCore.demo.controller;
 
 import com.byteCore.demo.dto.response.ProductResponseDTO;
-import com.byteCore.demo.service.ProductService;
+import com.byteCore.demo.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

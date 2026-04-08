@@ -1,5 +1,6 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.PixPaymentService;
 import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.domain.PaymentEntity;
 import com.byteCore.demo.domain.UserEntity;
@@ -10,7 +11,6 @@ import com.byteCore.demo.enums.PaymentMethod;
 import com.byteCore.demo.enums.PaymentStatus;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.PaymentRepository;
-import com.byteCore.demo.service.PixPaymentService;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;

@@ -1,16 +1,15 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.DigitalProductDeliveryService;
+import com.byteCore.demo.EmailService;
+import com.byteCore.demo.OrderService;
 import com.byteCore.demo.domain.*; // Importei com * pra ficar mais limpo
 import com.byteCore.demo.enums.DeliveryStatus;
 import com.byteCore.demo.enums.DeliveryType;
-import com.byteCore.demo.enums.ProductStatus;
 import com.byteCore.demo.repository.DeliveryLogRepository;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.ProductRepository;
 import com.byteCore.demo.repository.ProductStockRepository;
-import com.byteCore.demo.service.DigitalProductDeliveryService;
-import com.byteCore.demo.service.EmailService;
-import com.byteCore.demo.service.OrderService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

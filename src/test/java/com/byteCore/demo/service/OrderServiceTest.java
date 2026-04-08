@@ -1,7 +1,7 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.OrderService;
 import com.byteCore.demo.domain.OrderEntity;
-import com.byteCore.demo.domain.OrderItemEntity;
 import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.request.OrderCreateDTO;
@@ -12,7 +12,6 @@ import com.byteCore.demo.enums.ProductStatus;
 import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.ProductRepository;
-import com.byteCore.demo.service.OrderService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,6 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.AdminProductService;
 import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.dto.mapper.ProductMapper;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
@@ -7,7 +8,6 @@ import com.byteCore.demo.dto.request.ProductUpdateDTO;
 import com.byteCore.demo.dto.response.ProductResponseDTO;
 import com.byteCore.demo.enums.ProductStatus;
 import com.byteCore.demo.repository.ProductRepository;
-import com.byteCore.demo.service.AdminProductService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

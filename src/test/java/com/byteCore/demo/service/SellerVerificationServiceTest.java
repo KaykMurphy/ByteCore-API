@@ -1,12 +1,12 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.SellerVerificationService;
 import com.byteCore.demo.domain.SellerVerificationEntity;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.SellerVerificationMapper;
 import com.byteCore.demo.dto.request.SellerVerificationRequestDTO;
 import com.byteCore.demo.enums.VerificationStatus;
 import com.byteCore.demo.repository.SellerVerificationRepository;
-import com.byteCore.demo.service.SellerVerificationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import util.TestDataFactory;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

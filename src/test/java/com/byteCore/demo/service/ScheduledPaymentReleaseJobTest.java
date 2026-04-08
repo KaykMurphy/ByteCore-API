@@ -1,5 +1,6 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.ScheduledPaymentReleaseJob;
 import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.domain.OrderItemEntity;
 import com.byteCore.demo.domain.PaymentEntity;
@@ -7,10 +8,8 @@ import com.byteCore.demo.domain.ProductEntity;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.repository.PaymentRepository;
 import com.byteCore.demo.repository.UserRepository;
-import com.byteCore.demo.service.ScheduledPaymentReleaseJob;
-import org.junit.jupiter.api.Assertions; 
-import org.junit.jupiter.api.Test; 
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;

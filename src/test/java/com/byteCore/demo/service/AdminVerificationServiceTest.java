@@ -1,5 +1,7 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.AdminVerificationService;
+import com.byteCore.demo.BlacklistService;
 import com.byteCore.demo.domain.DocumentEntity;
 import com.byteCore.demo.domain.SellerVerificationEntity;
 import com.byteCore.demo.domain.UserEntity;
@@ -8,8 +10,6 @@ import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.enums.VerificationStatus;
 import com.byteCore.demo.repository.SellerVerificationRepository;
 import com.byteCore.demo.repository.UserRepository;
-import com.byteCore.demo.service.AdminVerificationService;
-import com.byteCore.demo.service.BlacklistService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import util.TestDataFactory;
 
-import javax.swing.text.Document;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

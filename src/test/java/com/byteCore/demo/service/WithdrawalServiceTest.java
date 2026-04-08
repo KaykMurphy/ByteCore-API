@@ -1,10 +1,10 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.WithdrawalService;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.domain.WithdrawalRequestEntity;
 import com.byteCore.demo.enums.WithdrawalStatus;
 import com.byteCore.demo.repository.WithdrawalRequestRepository;
-import com.byteCore.demo.service.WithdrawalService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

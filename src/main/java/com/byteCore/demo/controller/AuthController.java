@@ -7,7 +7,7 @@ import com.byteCore.demo.dto.request.RegisterRequestDTO;
 import com.byteCore.demo.dto.response.LoginResponseDTO;
 import com.byteCore.demo.dto.response.UserResponseDTO;
 import com.byteCore.demo.security.CustomUserDetails;
-import com.byteCore.demo.service.AuthService;
+import com.byteCore.demo.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

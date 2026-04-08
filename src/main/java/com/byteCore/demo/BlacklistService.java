@@ -1,4 +1,4 @@
-package com.byteCore.demo.service;
+package com.byteCore.demo;
 
 import com.byteCore.demo.domain.BannedDocumentEntity;
 import com.byteCore.demo.enums.DocumentType;

@@ -1,5 +1,6 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.ReviewService;
 import com.byteCore.demo.domain.*;
 import com.byteCore.demo.dto.mapper.ReviewMapper;
 import com.byteCore.demo.dto.request.ReviewRequestDTO;
@@ -7,7 +8,6 @@ import com.byteCore.demo.dto.response.ReviewResponseDTO;
 import com.byteCore.demo.repository.OrderRepository;
 import com.byteCore.demo.repository.ReviewRepository;
 import com.byteCore.demo.repository.UserRepository;
-import com.byteCore.demo.service.ReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

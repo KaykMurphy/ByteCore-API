@@ -3,13 +3,11 @@ package com.byteCore.demo.controller;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.response.PixPaymentResponseDTO;
 import com.byteCore.demo.security.CustomUserDetails;
-import com.byteCore.demo.service.PixPaymentService;
+import com.byteCore.demo.PixPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/payments")

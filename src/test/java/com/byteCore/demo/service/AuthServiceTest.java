@@ -1,5 +1,6 @@
-package com.byteCore.demo;
+package com.byteCore.demo.service;
 
+import com.byteCore.demo.AuthService;
 import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.UserMapper;
 import com.byteCore.demo.dto.request.LoginRequestDTO;
@@ -10,8 +11,6 @@ import com.byteCore.demo.enums.Role;
 import com.byteCore.demo.exceptions.DuplicateEmailException;
 import com.byteCore.demo.repository.UserRepository;
 import com.byteCore.demo.security.JwtUtils;
-import com.byteCore.demo.service.AuthService;
-import com.mercadopago.resources.user.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

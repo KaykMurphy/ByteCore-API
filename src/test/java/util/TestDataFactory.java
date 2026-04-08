@@ -1,6 +1,5 @@
 package util;
 
-import com.byteCore.demo.SellerVerificationServiceTest;
 import com.byteCore.demo.domain.*;
 import com.byteCore.demo.dto.request.ProductCreateDTO;
 import com.byteCore.demo.dto.request.ProductUpdateDTO;

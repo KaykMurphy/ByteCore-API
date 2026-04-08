@@ -5,7 +5,7 @@ import com.byteCore.demo.domain.UserEntity;
 import com.byteCore.demo.dto.mapper.SellerVerificationMapper;
 import com.byteCore.demo.dto.response.SellerVerificationResponseDTO;
 import com.byteCore.demo.security.CustomUserDetails;
-import com.byteCore.demo.service.AdminVerificationService;
+import com.byteCore.demo.AdminVerificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

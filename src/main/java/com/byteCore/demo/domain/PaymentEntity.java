@@ -44,6 +44,9 @@ public class PaymentEntity {
     @Column(columnDefinition = "TEXT")
     private String qrCode;
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal platformFeeAmount;
+
     @Column(columnDefinition = "TEXT")
     private String pixQrCode;
 
@@ -80,7 +83,7 @@ public class PaymentEntity {
     private BigDecimal sellerAmount; // quanto que o vendedor vai receber
 
 
-    public void calculateReleaseDate(boolean hasGoodReview){
+    public void calculateReleaseDate(boolean hasGoodReview, BigDecimal feePercentage){
 
         if(paidAt == null) {
             throw new IllegalStateException("Cannot calculate release date without payment date");
@@ -99,12 +102,17 @@ public class PaymentEntity {
         }
 
             this.sellerAmount = this.amount;
+
+        this.platformFeeAmount = this.amount.multiply(feePercentage);
+        this.sellerAmount = this.amount.subtract(this.platformFeeAmount);
     }
 
     public void markAsReleased() {
         moneyReleased = true;
         moneyReleasedAt = Instant.now();
     }
+
+
 
 
 }

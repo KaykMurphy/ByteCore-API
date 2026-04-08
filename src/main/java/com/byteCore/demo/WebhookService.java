@@ -1,4 +1,4 @@
-package com.byteCore.demo.service;
+package com.byteCore.demo;
 
 import com.byteCore.demo.domain.OrderEntity;
 import com.byteCore.demo.domain.PaymentEntity;
@@ -36,6 +36,9 @@ public class WebhookService {
     private final OrderService orderService;
     private final UserRepository  userRepository;
     private final PaymentClient paymentClient;
+
+    @Value("${bytemarket.fee.percentage:0.05}")
+    private BigDecimal feePercentage;
 
     @Value("${mercadopago.webhook.secret}")
     private String webhookSecret;
@@ -145,8 +148,11 @@ public class WebhookService {
                     boolean hasGoodReview = seller.getAverageRating() != null &&
                             seller.getAverageRating().compareTo(new BigDecimal("4.0")) >= 0;
 
-                    payment.calculateReleaseDate(hasGoodReview);
+                    payment.calculateReleaseDate(hasGoodReview, feePercentage);
                     seller.addToPendingBalance(payment.getSellerAmount());
+
+                    log.info("Taxa da plataforma (R$ {}) retida com sucesso.", payment.getPlatformFeeAmount());
+
                     userRepository.save(seller);
 
                     log.info("Saldo pendente de R$ {} adicionado para o vendedor {}",
