@@ -59,7 +59,7 @@ public class ProductControllerTest {
                 "url-da-imagem.jpg",
                 10L,
                 ProductType.GAME_KEY,
-                UUID.randomUUID(),
+                 UUID.randomUUID(),
                 "Loja do Dutch"
         );
 
