@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -128,5 +129,23 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<StandardError> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        StandardError error = new StandardError(
+                Instant.now(),
+                status.value(),
+                "Malformed JSON request",
+                "Erro ao ler o corpo da requisição. Verifique se o formato e os tipos de dados (como números e datas) estão corretos.",
+                request.getRequestURI()
+        );
+
+        log.warn("Malformed JSON attempt: {}", ex.getMessage());
+        return ResponseEntity.status(status).body(error);
+    }
 
 }
