@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers("/api/bot/**").permitAll()
 
                         .requestMatchers("/api/webhooks/**").permitAll()
 
