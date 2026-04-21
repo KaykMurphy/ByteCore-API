@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,22 +33,25 @@ public class SellerVerificationController {
     private final SellerVerificationService sellerVerificationService;
 
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<SellerVerificationResponseDTO> submitVerification(
             @Valid @RequestBody SellerVerificationRequestDTO dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails){
+            Authentication authentication
+    ) {
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
 
         UserEntity user = userDetails.getUser();
 
-
-        SellerVerificationEntity savedEntity
-                = sellerVerificationService.submitVerification(user, dto);
+        SellerVerificationEntity savedEntity =
+                sellerVerificationService.submitVerification(user, dto);
 
         SellerVerificationResponseDTO response =
                 sellerVerificationMapper.toResponseDTO(savedEntity);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<List<SellerVerificationResponseDTO>> getMyVerificationHistory(
